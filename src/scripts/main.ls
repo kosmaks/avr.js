@@ -124,7 +124,17 @@ clear = ({viewport = [gl.viewport-width, gl.viewport-height],\
 
 # Reverse version of set-interval
 draw-loop = (delay, cb) ->
-  set-interval cb, delay
+  frames = 0
+  start = (new Date).get-time!
+  fps = document.create-element \div
+  fps.set-attribute \style 'position: fixed; top: 0; left: 0; padding: 5px; background: white; color: black; opacity: 0.5;'
+  document.body.append-child fps
+  set-interval (->
+    cb()
+    frames += 1
+    end = (new Date).get-time!
+    fps.innerHTML = "FPS: " + Math.round(frames / ((end - start) / 1000))
+  ), delay
 
 # Rendering pass to framebuffer
 pass = (program, fb, args={}, cb) ->
@@ -142,7 +152,7 @@ pass = (program, fb, args={}, cb) ->
 # Main program
 #
 
-size = [2048, 1]
+size = [128, 128]
 sizeM = size[0] * size[1]
 sizex = "#{size[0]}.0"
 sizey = "#{size[1]}.0"
@@ -332,7 +342,7 @@ bitonic-sort = (back-buf, front-buf) ->
 back-buf  = create-framebuffer size: size
 front-buf = create-framebuffer size: size
 
-#<- draw-loop 300
+<- draw-loop 16
 
 use-program main-prog, (prog) ->
 
@@ -351,6 +361,6 @@ use-program main-prog, (prog) ->
   prog.draw-display!
 
   # debug with points
-  pixels = read-pixels to-debug
-  points <- use-program points-prog
-  points.draw-buffer (create-buffer pixels), vars: 4
+  #pixels = read-pixels to-debug
+  #points <- use-program points-prog
+  #points.draw-buffer (create-buffer pixels), vars: 4

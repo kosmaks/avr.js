@@ -165,7 +165,19 @@
       return gl.clear(gl.COLOR_BUFFER_BIT);
     };
     drawLoop = function(delay, cb){
-      return setInterval(cb, delay);
+      var frames, start, fps;
+      frames = 0;
+      start = (new Date).getTime();
+      fps = document.createElement('div');
+      fps.setAttribute('style', 'position: fixed; top: 0; left: 0; padding: 5px; background: white; color: black; opacity: 0.5;');
+      document.body.appendChild(fps);
+      return setInterval(function(){
+        var end;
+        cb();
+        frames += 1;
+        end = (new Date).getTime();
+        return fps.innerHTML = "FPS: " + Math.round(frames / ((end - start) / 1000));
+      }, delay);
     };
     pass = function(program, fb, args, cb){
       args == null && (args = {});
@@ -189,7 +201,7 @@
         });
       });
     };
-    size = [2048, 1];
+    size = [128, 128];
     sizeM = size[0] * size[1];
     sizex = size[0] + ".0";
     sizey = size[1] + ".0";
@@ -255,19 +267,15 @@
     frontBuf = createFramebuffer({
       size: size
     });
-    return useProgram(mainProg, function(prog){
-      var resBuf, toDebug, pixels;
-      pass(fillProg, backBuf);
-      resBuf = bitonicSort(backBuf, frontBuf);
-      toDebug = resBuf;
-      clear();
-      useTexture(toDebug.texture);
-      prog.drawDisplay();
-      pixels = readPixels(toDebug);
-      return useProgram(pointsProg, function(points){
-        return points.drawBuffer(createBuffer(pixels), {
-          vars: 4
-        });
+    return drawLoop(16, function(){
+      return useProgram(mainProg, function(prog){
+        var resBuf, toDebug;
+        pass(fillProg, backBuf);
+        resBuf = bitonicSort(backBuf, frontBuf);
+        toDebug = resBuf;
+        clear();
+        useTexture(toDebug.texture);
+        return prog.drawDisplay();
       });
     });
   });
