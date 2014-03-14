@@ -152,7 +152,7 @@ pass = (program, fb, args={}, cb) ->
 # Main program
 #
 
-size = [128, 128]
+size = [16, 16]
 sizeM = size[0] * size[1]
 sizex = "#{size[0]}.0"
 sizey = "#{size[1]}.0"
@@ -184,6 +184,7 @@ main-prog = create-program {
 
   void main() {
     gl_FragColor = texture2D(sampler, index);
+    gl_FragColor.x = 0.;
     gl_FragColor.w = 1.;
   }
   """
@@ -194,7 +195,7 @@ points-prog = create-program {
   attribute vec2 vertex;
 
   void main() {
-    gl_PointSize = 3.;
+    gl_PointSize = 5.;
     gl_Position = vec4((vertex / 127.5) - 1., 0., 1.);
   }
   """
@@ -212,9 +213,11 @@ fill-prog = create-program {
   varying vec2 index;
 
   void main() {
+    vec2 native = floor(vec2(index.x * #sizex, index.y * #sizey));
     gl_FragColor = vec4(
-      index.x,
-      mod(10. * index.x, 3.) / 3.,
+      (native.x + native.y * #sizex) / #sizeM.,
+      //mod(10. * index.x, 3.) / 3.,
+      (1. - index.x * index.y),
       0.,
       1.
     );
@@ -273,14 +276,17 @@ bitonic-sort-prog = create-program {
   vec2 current = texture2D(src, index).xy;
 
   void main() {
-    bool even = mod(floor(#sizex * index.x / spread), 2.) == 0.;
+    vec2 native = TO_PIX(index);
+    float curr = native.x + native.y * #sizex;
+    
+    bool even = mod(floor(curr / spread), 2.) == 0.;
     vec2 bCoord = coordShift((even ? 1. : -1.) * spread, index);
 
     float a = current.y;
     float b = texture2D(src, bCoord).y;
 
     // fill result
-    gl_FragColor.x = current.x;
+    gl_FragColor.x = curr / #sizeM.;
     gl_FragColor.y = DIR_CMP(even, a, b);
     gl_FragColor.z = 0.;
     gl_FragColor.w = 1.;
@@ -313,7 +319,7 @@ bitonic-merge-prog = create-program {
     float b = texture2D(src, bCoord).y;
 
     // fill result
-    gl_FragColor.x = current.x;
+    gl_FragColor.x = curr / #sizeM.;
     gl_FragColor.y = DIR_CMP(even, a, b);
     gl_FragColor.z = 0.;
     gl_FragColor.w = 1.;
@@ -342,14 +348,12 @@ bitonic-sort = (back-buf, front-buf) ->
 back-buf  = create-framebuffer size: size
 front-buf = create-framebuffer size: size
 
-<- draw-loop 16
+<- draw-loop 1000
 
 use-program main-prog, (prog) ->
 
   # initial data
   pass fill-prog, back-buf
-  #pass convert-prog, part-buf, fill: fill-buf.texture
-  #pass bitonic-sort-prog, part-buf, src: fill-buf.texture, (b) ->
 
   # sort array
   res-buf = bitonic-sort back-buf, front-buf
@@ -361,6 +365,7 @@ use-program main-prog, (prog) ->
   prog.draw-display!
 
   # debug with points
-  #pixels = read-pixels to-debug
-  #points <- use-program points-prog
-  #points.draw-buffer (create-buffer pixels), vars: 4
+  pixels = read-pixels to-debug
+  points <- use-program points-prog
+  #for x in [1 to pixels.length by 4] => console.log pixels[x]
+  points.draw-buffer (create-buffer pixels), vars: 4
