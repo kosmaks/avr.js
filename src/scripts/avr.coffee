@@ -122,32 +122,46 @@ class AVR.Context
     """
     @createProgram opts
 
-  loadProgram: ({vertexUrl, fragmentUrl}, cb) ->
+  loadProgram: ({vertexUrl, fragmentUrl}, defines = {}, cb) ->
     $.get vertexUrl, {}, (vertex) =>
       $.get fragmentUrl, {}, (fragment) =>
-        res = @createProgram({ fragment: fragment, vertex: vertex })
+        res = @createProgram({
+          fragment: @sourceReplace(fragment, defines),
+          vertex: @sourceReplace(vertex, defines)
+        })
         res.vertexSource = vertex
         res.fragmentSource = fragment
         cb? res
 
-  loadDisplayProgram: (fragmentUrl, cb) ->
+  loadDisplayProgram: (fragmentUrl, defines = {}, cb) ->
     $.get fragmentUrl, {}, (fragment) =>
-      res = @createDisplayProgram({ fragment: fragment })
+      res = @createDisplayProgram({
+        fragment: @sourceReplace(fragment, defines)
+      })
       res.fragmentSource = fragment
       cb? res
 
-  loadPrograms: (progs = {}, cb) ->
+  loadPrograms: (progs = {}, defines = {}, cb) ->
     count = 0
     count++ for _, __ of progs
     result = {}
-    for name, info of progs
-      loader = if typeof(info) == "object" \
-               then 'loadProgram' \
-               else 'loadDisplayProgram'
-      @[loader] info, (prog) ->
-        result[name] = prog
-        count -= 1
-        cb? result if count <= 0
+    for nameIter, info of progs
+      ((name) =>
+        loader = if typeof(info) == "object" \
+                 then 'loadProgram' \
+                 else 'loadDisplayProgram'
+        @[loader] info, defines, (prog) ->
+          result[name] = prog
+          count -= 1
+          cb? result if count <= 0
+      )(nameIter)
+
+  sourceReplace: (source, defines = {}) ->
+    result = source
+    for name, value of defines
+      re = new RegExp("\\$#{name}", 'g')
+      result = result.replace(re, value)
+    result
 
   display: -> @displayBuf ?= @createBuffer [-1, -1, 1, -1, -1, 1, 1, 1]
 
