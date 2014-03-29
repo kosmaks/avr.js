@@ -72,6 +72,13 @@ class AVR.Framebuffer extends AVR.GLContext
   activeTexture: (id = 0) ->
     @avr.useTexture @texture, id
 
+  getPixels: ->
+    buffer = null
+    @use =>
+      buffer = new Uint8Array 4 * @size[0] * @size[1]
+      @gl.readPixels 0, 0, @size[0], @size[1], @gl.RGBA, @gl.UNSIGNED_BYTE, buffer
+    buffer
+
   initialize: ({@attach, @size, @format, @type, @data}) ->
     @attach ?= @gl.COLOR_ATTACHMENT0
     @size   ?= [128, 128]
@@ -143,7 +150,7 @@ class AVR.Context
 
   loadPrograms: (progs = {}, defines = {}, cb) ->
     count = 0
-    count++ for _, __ of progs
+    count++ for _, _ of progs
     result = {}
     for nameIter, info of progs
       ((name) =>
@@ -176,3 +183,6 @@ class AVR.Context
     @gl.activeTexture @gl["TEXTURE#{id}"]
     @gl.bindTexture @gl.TEXTURE_2D, tex
     id
+
+  drawLoop: (time, cb) ->
+    setInterval cb, time

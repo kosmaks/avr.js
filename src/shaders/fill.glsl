@@ -2,6 +2,7 @@ precision mediump float;
 varying vec2 index;
 
 void main() {
-  vec2 _ = index;
-  gl_FragColor = vec4($hi, 0., 0., 1.);
+  gl_FragColor = vec4(index.x, 0.5 + 0.5 * index.y, index.y, 1.) 
+               * $factor;
+  gl_FragColor.w = 1.;
 }

@@ -19,15 +19,14 @@ class AVR.Chain extends AVR.GLContext
     @backs[name] = @avr.createFramebuffer opts
     @fronts[name] = @avr.createFramebuffer opts
 
-  pass: (prog, output, fbs = [], cb) ->
+  pass: (prog, output, fbs = {}, cb) ->
     i = 0
     prog.use (prog) =>
-      for fb in fbs
-        info = @parseSelector(fb)
-        prog.sendInt info.name, info.fb.activeTexture(i)
+      for name, fb of fbs
+        prog.sendInt name, @parseSelector(fb).activeTexture(i)
         i += 1
       if output?
-        @parseSelector(output).fb.use (buf) =>
+        @parseSelector(output).use (buf) =>
           buf.clear()
           cb? { prog: prog, buf: buf }
           prog.drawDisplay()
@@ -36,7 +35,7 @@ class AVR.Chain extends AVR.GLContext
         cb? { prog: prog }
         prog.drawDisplay()
 
-  getBuffer: (selector) -> @parseSelector(selector).fb
+  getBuffer: (selector) -> @parseSelector(selector)
 
   swapBuffers: ->
     @trig = not @trig
@@ -48,7 +47,7 @@ class AVR.Chain extends AVR.GLContext
     name   = selector
     source = 'framebuffers'
 
-    if info.length == 2
+    if info.length >= 2
       name = info[1]
       source = if info[0] == 'back'
         (if @trig then 'backs' else 'fronts')
@@ -58,9 +57,6 @@ class AVR.Chain extends AVR.GLContext
     unless @[source]?[name]?
       throw new Error "Can't find buffer '#{selector}'"
 
-    {
-      name: name
-      fb: @[source][name]
-    }
+    return @[source][name]
 
 AVR.Context::createChain = -> new AVR.Chain this
