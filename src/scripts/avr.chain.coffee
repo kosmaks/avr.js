@@ -22,13 +22,18 @@ class AVR.Chain extends AVR.GLContext
   pass: (prog, output, fbs = [], cb) ->
     i = 0
     prog.use (prog) =>
-      @parseSelector(output).fb.use (buf) =>
-        for fb in fbs
-          info = @parseSelector(fb)
-          prog.sendInt info.name, info.fb.activeTexture(i)
-          i += 1
-        buf.clear()
-        cb? { prog: prog, buf: buf }
+      for fb in fbs
+        info = @parseSelector(fb)
+        prog.sendInt info.name, info.fb.activeTexture(i)
+        i += 1
+      if output?
+        @parseSelector(output).fb.use (buf) =>
+          buf.clear()
+          cb? { prog: prog, buf: buf }
+          prog.drawDisplay()
+      else
+        @avr.clear()
+        cb? { prog: prog }
         prog.drawDisplay()
 
   getBuffer: (selector) -> @parseSelector(selector).fb
