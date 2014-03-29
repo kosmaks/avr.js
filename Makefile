@@ -1,5 +1,5 @@
-all:
+coffee:
 	rm -rf out/*
 	cp -rf src/* out
-	livescript -c `tree -if out | grep -e '.*\.ls$$'`
-	rm -rf `tree -if out | grep -e '.*\.ls$$'`
+	coffee -c `tree -if out | grep -e '.*\.coffee$$'`
+	rm -rf `tree -if out | grep -e '.*\.coffee$$'`

@@ -1,0 +1,23 @@
+{
+  "name": "avr-thesis",
+  "version": "0.0.1",
+  "main": "src/server.coffee",
+
+  "repository": {
+    "type": "git",
+    "url": "..."
+  },
+
+  "readme": "No readme yet",
+
+  "dependencies": {
+    "coffee-script": ">=1.7.x",
+    "express": "3.x"
+  },
+
+  "scripts": {
+    "install": "make coffee",
+    "start": "node out/server.js"
+  }
+}
+

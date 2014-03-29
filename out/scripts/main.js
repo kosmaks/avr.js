@@ -3,16 +3,24 @@
   (function(it){
     return window.onload = it;
   })(function(){
-    var avs, size, sizeM, sizex, sizey, h, m, texVertex, helper, mainProg, pointsProg, fillProg, convertProg, bitonicHelper, bitonicSortProg, bitonicMergeProg, passBitonic, backBuf, frontBuf, sortedBuf;
+    var avs, size, sizeM, h, m, k, u, restDens, sizex, sizey, h_, m_, k_, u_, restDens_, texVertex, helper, mainProg, pointsProg, fillProg, zeroProg, convertProg, bitonicHelper, bitonicSortProg, bitonicMergeProg, densityProg, pressureProg, viscosityProg, velocityProg, particlesProg, passBitonic, part, vel, densityBuf, pressureBuf, viscosityBuf, trig;
     avs = new AVS(document.getElementById('display'));
-    size = [2, 8];
+    size = [16, 16];
     sizeM = size[0] * size[1];
-    sizex = size[0] + ".0";
-    sizey = size[1] + ".0";
-    h = 0.0002;
+    h = 0.8;
     m = 1;
+    k = 0.0001;
+    u = 1;
+    restDens = 1.0;
+    sizex = size[0].toFixed(8);
+    sizey = size[1].toFixed(8);
+    h_ = h.toFixed(8);
+    m_ = m.toFixed(8);
+    k_ = k.toFixed(8);
+    u_ = u.toFixed(8);
+    restDens_ = restDens.toFixed(8);
     texVertex = "attribute vec2 vertex;\nvarying vec2 index;\n\nvoid main() {\n  index.x = (vertex.x > 0.) ? 1. : 0.;\n  index.y = (vertex.y > 0.) ? 1. : 0.;\n  gl_Position = vec4(vertex, 0., 1.);\n}";
-    helper = "precision mediump float;\n#define AT(arr, x, y) texture2D(arr, vec2(x / " + sizex + ", y / " + sizey + ")\n\n#define X_TO_TEX(val) (val / " + sizex + ")\n#define Y_TO_TEX(val) (val / " + sizey + ")\n#define X_TO_PIX(val) floor(val * " + sizex + ")\n#define Y_TO_PIX(val) floor(val * " + sizey + ")\n\n#define TO_PIX(vec) vec2(X_TO_PIX(vec.x), Y_TO_PIX(vec.y))\n#define TO_TEX(vec) vec2(X_TO_TEX(vec.x), Y_TO_TEX(vec.y))";
+    helper = "precision mediump float;\n#define AT(arr, x, y) texture2D(arr, vec2(x / " + sizex + ", y / " + sizey + ")\n\n#define X_TO_TEX(val) (val / " + sizex + ")\n#define Y_TO_TEX(val) (val / " + sizey + ")\n#define X_TO_PIX(val) floor(val * " + sizex + ")\n#define Y_TO_PIX(val) floor(val * " + sizey + ")\n\n#define TO_PIX(vec) vec2(X_TO_PIX(vec.x), Y_TO_PIX(vec.y))\n#define TO_TEX(vec) vec2(X_TO_TEX(vec.x), Y_TO_TEX(vec.y))\n#define TO_PIX2(x, y) vec2(X_TO_PIX(x), Y_TO_PIX(y))\n#define TO_TEX2(x, y) vec2(X_TO_TEX(x), Y_TO_TEX(y))\n\n#define FLOOR_EQ(x, y) (floor(x) == floor(y))";
     mainProg = avs.createProgram({
       vertex: texVertex,
       fragment: "precision mediump float;\nuniform sampler2D sampler;\nvarying vec2 index;\n\nvoid main() {\n  gl_FragColor = texture2D(sampler, index);\n  gl_FragColor.w = 1.;\n}"
@@ -23,7 +31,11 @@
     });
     fillProg = avs.createProgram({
       vertex: texVertex,
-      fragment: "precision mediump float;\nvarying vec2 index;\n\nvoid main() {\n  vec2 native = floor(vec2(index.x * " + sizex + ", index.y * " + sizey + "));\n  gl_FragColor = vec4(\n    (1. - index.x),\n    (1. - index.y),\n    0.,\n    1.\n  );\n}"
+      fragment: "precision mediump float;\nvarying vec2 index;\n\nvoid main() {\n  gl_FragColor = vec4(\n    index.x,\n    index.y,\n    0.,\n    1.\n  );\n}"
+    });
+    zeroProg = avs.createProgram({
+      vertex: texVertex,
+      fragment: "precision mediump float;\nvarying vec2 index;\n\nvoid main() {\n  vec2 _ = index;\n  gl_FragColor = vec4(0., 0., 0., 1.);\n}"
     });
     convertProg = avs.createProgram({
       vertex: texVertex,
@@ -37,6 +49,26 @@
     bitonicMergeProg = avs.createProgram({
       vertex: texVertex,
       fragment: "" + helper + "\n" + bitonicHelper + "\n\nvarying vec2 index;\nuniform sampler2D src;\nuniform float count;\nvec4 current = texture2D(src, index);\n\nfloat blockSize = " + sizeM + ". / count;\n\nvoid main() {\n  vec2 native = TO_PIX(index);\n  float curr = native.x + native.y * " + sizex + ";\n  bool even = mod(floor(curr / (blockSize / 2.)), 2.) == 0.;\n\n  float shift = (blockSize - 1.) - (2. * mod(curr, blockSize));\n  vec2 bCoord = coordShift(shift, index);\n\n  float a = current.x;\n  float b = texture2D(src, bCoord).x;\n\n  // fill result\n  gl_FragColor = current;\n  gl_FragColor.x = DIR_CMP(even, a, b);\n}"
+    });
+    densityProg = avs.createProgram({
+      vertex: texVertex,
+      fragment: "" + helper + "\nuniform sampler2D particles;\nvarying vec2 index;\n\nvoid main() {\n  vec2 curPart = texture2D(particles, index).xy;\n  float density = 0.;\n  float h9 = " + Math.pow(h, 9).toFixed(8) + ";\n  float h2 = " + Math.pow(h, 2).toFixed(8) + ";\n  float k = " + m_ + " * 315. / (64. * 3.14 * h9);\n\n  vec2 curPix = TO_PIX(index);\n\n  for (float x = 0.; x < " + sizex + "; ++x)\n  for (float y = 0.; y < " + sizey + "; ++y) {\n    if (FLOOR_EQ(x, curPix.x) && FLOOR_EQ(y, curPix.y)) continue;\n    vec2 pos = TO_TEX2(x, y);\n    vec2 neiPart = texture2D(particles, pos).xy;\n    float dist = distance(neiPart, curPart);\n    if (dist > " + h_ + ") continue;\n\n    density += k * pow(h2 - pow(dist, 2.), 3.);\n  }\n\n  gl_FragColor = vec4(density, 0., 0., 1.);\n}"
+    });
+    pressureProg = avs.createProgram({
+      vertex: texVertex,
+      fragment: "" + helper + "\nuniform sampler2D particles;\nuniform sampler2D densities;\nvarying vec2 index;\n\nvoid main() {\n  vec2 curPart = texture2D(particles, index).xy;\n  float curDens = texture2D(densities, index).x;\n\n  vec2 gradP = vec2(0., 0.);\n  float h6 = " + Math.pow(h, 6).toFixed(8) + ";\n  float k = " + m_ + " * (-45. / (3.14 * h6));\n\n  vec2 curPix = TO_PIX(index);\n  float curPres = " + k_ + " * (curDens - " + restDens_ + ");\n\n  for (float x = 0.; x < " + sizex + "; ++x)\n  for (float y = 0.; y < " + sizey + "; ++y) {\n    if (FLOOR_EQ(x, curPix.x) && FLOOR_EQ(y, curPix.y)) continue;\n    vec2 pos = TO_TEX2(x, y);\n    vec2 neiPart = texture2D(particles, pos).xy;\n    float dist = distance(neiPart, curPart);\n    if (dist > " + h_ + ") continue;\n\n    float neiDens = texture2D(densities, pos).x;\n    float neiPres = " + k_ + " * (neiDens - " + restDens_ + ");\n\n    vec2 mgradW = k * pow(" + h_ + " - dist, 2.) * (curPart - neiPart) / dist;\n    vec2 grapPi = ((curPres / pow(curDens, 2.)) + (neiPres / pow(neiDens, 2.))) * mgradW;\n\n    gradP += grapPi;\n  }\n\n  gl_FragColor = vec4(gradP, 0., 1.);\n}"
+    });
+    viscosityProg = avs.createProgram({
+      vertex: texVertex,
+      fragment: "" + helper + "\nuniform sampler2D velocities;\nuniform sampler2D densities;\nuniform sampler2D particles;\nvarying vec2 index;\n\nvoid main() {\n  vec2 curVel = texture2D(velocities, index).xy;\n  vec2 curPart = texture2D(particles, index).xy;\n  float curDens = texture2D(densities, index).x;\n\n  vec2 gradU = vec2(0., 0.);\n  float h6 = " + Math.pow(h, 6).toFixed(8) + ";\n  float k = " + m_ + " * (45. / (3.14 * h6));\n\n  vec2 curPix = TO_PIX(index);\n  float curPres = " + k_ + " * (curDens - " + restDens_ + ");\n\n  for (float x = 0.; x < " + sizex + "; ++x)\n  for (float y = 0.; y < " + sizey + "; ++y) {\n    if (FLOOR_EQ(x, curPix.x) && FLOOR_EQ(y, curPix.y)) continue;\n    vec2 pos = TO_TEX2(x, y);\n    vec2 neiPart = texture2D(particles, pos).xy;\n    float dist = distance(neiPart, curPart);\n    if (dist > " + h_ + ") continue;\n\n    vec2 neiVel = texture2D(velocities, pos).xy;\n    float neiDens = texture2D(densities, pos).x;\n    float neiPres = " + k_ + " * (neiDens - " + restDens_ + ");\n\n    gradU += k * (" + h_ + " - dist) * (neiVel - curVel) / neiDens;\n  }\n\n  gradU *= " + u_ + " / curDens;\n\n  gl_FragColor = vec4(gradU, 0., 1.);\n}"
+    });
+    velocityProg = avs.createProgram({
+      vertex: texVertex,
+      fragment: "" + helper + "\nuniform sampler2D backbuf;\nuniform sampler2D pressures;\nuniform sampler2D viscosities;\nuniform sampler2D particles;\nvarying vec2 index;\n\nvec2 gravity = vec2(0.0000, -0.002);\n\nvoid main() {\n  vec2 velocity = texture2D(backbuf, index).xy;\n  vec2 part     = texture2D(particles, index).xy;\n  vec2 gradP    = texture2D(pressures, index).xy;\n  vec2 gradU    = texture2D(viscosities, index).xy;\n\n  velocity += gravity;\n  velocity -= gradP;\n  velocity += gradU;\n\n  if (part.x + velocity.x > 1.0 || part.x + velocity.x < 0.0) velocity.x *= -0.2;\n  if (part.y + velocity.y > 1.0 || part.y + velocity.y < 0.0) velocity.y *= -0.2;\n\n  gl_FragColor = vec4(velocity, 0., 1.);\n}"
+    });
+    particlesProg = avs.createProgram({
+      vertex: texVertex,
+      fragment: "" + helper + "\nuniform sampler2D backbuf;\nuniform sampler2D velocities;\nvarying vec2 index;\n\nvoid main() {\n  vec2 position = texture2D(backbuf, index).xy;\n  vec2 velocity = texture2D(velocities, index).xy;\n\n  position += velocity;\n  position.x = min(1.0, position.x);\n  position.x = max(0.0, position.x);\n  position.y = min(1.0, position.y);\n  position.y = max(0.0, position.y);\n\n  gl_FragColor = vec4(position, 0., 1.);\n}"
     });
     passBitonic = function(backBuf, frontBuf){
       var b, merge, sort;
@@ -65,27 +97,69 @@
         return b.prog.sendFloat('spread', sort);
       }
     };
-    backBuf = avs.createFramebuffer({
+    part = {
+      back: avs.createFramebuffer({
+        size: size
+      }),
+      front: avs.createFramebuffer({
+        size: size
+      })
+    };
+    vel = {
+      back: avs.createFramebuffer({
+        size: size
+      }),
+      front: avs.createFramebuffer({
+        size: size
+      })
+    };
+    densityBuf = avs.createFramebuffer({
       size: size
     });
-    frontBuf = avs.createFramebuffer({
+    pressureBuf = avs.createFramebuffer({
       size: size
     });
-    avs.pass(fillProg, backBuf);
-    avs.pass(convertProg, frontBuf, {
-      src: backBuf.texture
+    viscosityBuf = avs.createFramebuffer({
+      size: size
     });
-    sortedBuf = passBitonic(frontBuf, backBuf);
-    return avs.useProgram(mainProg, function(prog){
-      var toDebug, pixels;
-      toDebug = sortedBuf;
-      avs.clear();
-      avs.useTexture(toDebug.texture);
-      prog.drawDisplay();
-      pixels = avs.prettyPrint(toDebug);
-      return avs.useProgram(pointsProg, function(points){
-        return points.drawBuffer(avs.createBuffer(pixels), {
-          vars: 4
+    avs.pass(fillProg, part.back);
+    avs.pass(zeroProg, vel.back);
+    trig = false;
+    return avs.drawLoop(16, function(){
+      var back, front;
+      trig = !trig;
+      back = trig ? 'back' : 'front';
+      front = trig ? 'front' : 'back';
+      avs.pass(densityProg, densityBuf, {
+        particles: part[back].texture
+      });
+      avs.pass(pressureProg, pressureBuf, {
+        particles: part[back].texture,
+        densities: densityBuf.texture
+      });
+      avs.pass(viscosityProg, viscosityBuf, {
+        velocities: vel[back].texture,
+        particles: part[back].texture,
+        densities: densityBuf.texture
+      });
+      avs.pass(velocityProg, vel[front], {
+        backbuf: vel[back].texture,
+        particles: part[back].texture,
+        pressures: pressureBuf.texture,
+        viscosities: viscosityBuf.texture
+      });
+      avs.pass(particlesProg, part[front], {
+        backbuf: part[back].texture,
+        velocities: vel[front].texture
+      });
+      return avs.useProgram(mainProg, function(prog){
+        var pixels;
+        avs.clear();
+        pixels = avs.readPixels(part[front]);
+        return avs.useProgram(pointsProg, function(points){
+          return points.drawBuffer(avs.createBuffer(pixels), {
+            vars: 4
+          });
         });
       });
     });
