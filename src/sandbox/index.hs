@@ -81,27 +81,26 @@ gpressures world liquid densities = map
 -- Main program
 
 plotState :: [Vec] -> [GPressure] -> [Density] -> IO ()
-plotState vecs pres dens = do
-  plotPaths [] $ zipWith zipper vecsT presT
+plotState vecs presW dens = do
+  plotPaths [] $ map mapper $ zip vecs pres
   where toTuple (x V.:. y V.:. _) = (x, y)
-        vecsT = map toTuple vecs
-        presT = map toTuple $ map getGPressure pres
-        zipper x y = [x, y]
+        pres = map getGPressure presW
+        mapper (x, y) = [toTuple x, toTuple (x + y)]
 
 toVecs :: [Float] -> Vec
 toVecs = V.fromList
 
 main = do
-  let points = map toVecs [[0.25, 0.25],
-                           [0.25, 0.75],
-                           [0.75, 0.25],
-                           [0.75, 0.75]]
+  let points = map toVecs [[25, 25],
+                           [25, 35],
+                           [75, 25],
+                           [75, 75]]
 
-  let world = World { k  = 0.001,
+  let world = World { k  = 0.0004,
                       r0 = 1.0 }
 
   let liquid = Liquid { m = Mass 1.0,
-                        h = Distance 0.8,
+                        h = Distance 15,
                         parts = points }
 
   let dens = densities liquid

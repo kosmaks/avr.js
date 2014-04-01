@@ -39,14 +39,15 @@ $ ->
     c.pass(p.fill, 'back particles')
     c.pass(p.zero, 'back velocities')
 
-    $("#next").click ->
-    #avr.drawLoop 16, ->
+    #$("#next").click ->
+    avr.drawLoop 16, ->
 
       # Process
       c.pass(p.velocity, 'front velocities', {
         back: 'back velocities'
         particles: 'back particles'
       })
+
       c.pass(p.position, 'front particles', {
         back: 'back particles'
         velocities: 'front velocities'
