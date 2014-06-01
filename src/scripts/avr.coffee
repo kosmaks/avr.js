@@ -14,6 +14,8 @@ class AVR.Program extends AVR.GLContext
 
   sendFloat2: (name, value) -> @gl.uniform2f @uniformLoc(name), value[0], value[1]
 
+  sendFloat3: (name, value) -> @gl.uniform3f @uniformLoc(name), value[0], value[1], value[2]
+
   drawBuffer: (buffer, {type, attrib, vars} = {}) ->
     type   ?= @gl.POINTS
     attrib ?= 'vertex'
@@ -102,6 +104,7 @@ class AVR.Context
   constructor: (@el) -> if @el?
     @gl = el.getContext 'experimental-webgl'
     @gl.getExtension 'OES_texture_float' if @ready()
+    @gl.enable @gl.DEPTH_TEST
 
   ready: -> @gl?
 
@@ -174,7 +177,7 @@ class AVR.Context
 
   clear: ({viewport, color} = {}) ->
     viewport ?= [@el.width, @el.height]
-    color    ?= [0, 0, 0, 0]
+    color    ?= [0.0, 0.0, 0.0, 0]
     @gl.viewport 0, 0, viewport[0], viewport[1]
     @gl.clearColor color[0], color[1], color[2], color[3]
     @gl.clear @gl.COLOR_BUFFER_BIT

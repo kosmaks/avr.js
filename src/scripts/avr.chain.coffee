@@ -4,6 +4,7 @@ class AVR.Chain extends AVR.GLContext
     @backs = {}
     @fronts = {}
     @trig = false
+    @trigState = {}
 
   # helpers
 
@@ -51,8 +52,13 @@ class AVR.Chain extends AVR.GLContext
       name = info[1]
       source = if info[0] == 'back'
         (if @trig then 'backs' else 'fronts')
-      else
+      else if info[0] == 'front'
         (if @trig then 'fronts' else 'backs')
+      else if info[0] == 'switch'
+        @trigState[name] = !@trigState[name]
+        (if @trigState[name] then 'fronts' else 'backs')
+      else if info[0] == 'auto'
+        (if @trigState[name] then 'fronts' else 'backs')
 
     unless @[source]?[name]?
       throw new Error "Can't find buffer '#{selector}'"

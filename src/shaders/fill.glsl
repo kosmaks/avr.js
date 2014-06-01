@@ -1,16 +1,18 @@
 precision mediump float;
 varying vec2 index;
 
+float shrinkX = 0.3;
+float shrinkY = 0.3;
+float shrinkZ = 0.3;
+
+float seed = 1.;
+float random() {
+  return fract((seed += index.y) * 523.8223652729 * index.x);
+}
+
 void main() {
-  float realX = index.x * $sizex;
-  float realY = index.y * $sizey;
-  float i = realY * $sizex + realX;
-  float side = floor(pow($count, 1./3.));
-
-  gl_FragColor.x = floor(i / side / side);
-  gl_FragColor.y = floor(i / side) - side * gl_FragColor.x;
-  gl_FragColor.z = i - side * gl_FragColor.y - side * side * gl_FragColor.x;
-
-  gl_FragColor *= $factor / side;
-  gl_FragColor.w = 1.;
+  /*gl_FragColor = vec4(index.x, 0., index.y, 1.)*/
+               /** $factor;*/
+  gl_FragColor = vec4(random(), random(), random(), 1.)
+               * $factor;
 }
