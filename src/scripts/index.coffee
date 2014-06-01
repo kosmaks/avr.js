@@ -18,22 +18,25 @@ $ ->
   avr = new AVR.Context(document.getElementById 'display')
   avr.loadPrograms {
 
+    # Basic functions
     fill      : "shaders/fill.glsl"
     zero      : "shaders/zero.glsl"
     display   : "shaders/display.glsl"
-    velocity  : "shaders/velocity.glsl"
-    position  : "shaders/position.glsl"
 
+    # Neighbour search
     genGridCells: "shaders/gen_grid_cells.glsl"
-    bitonic     : "shaders/bitonic.glsl"
+    genAccessor : "shaders/gen_accessor.glsl"
+    bitonicSort : "shaders/bitonic.glsl"
 
+    # SPH
     gridDensities : "shaders/grid_densities.glsl"
     gridPressures : "shaders/grid_pressures.glsl"
     densities : "shaders/densities.glsl"
     gpressure : "shaders/gpressure.glsl"
+    velocity  : "shaders/velocity.glsl"
+    position  : "shaders/position.glsl"
 
-    genAccessor: "shaders/gen_accessor.glsl"
-
+    # Rendering
     particles : {
       vertexUrl   : "shaders/particles.vertex.glsl"
       fragmentUrl : "shaders/particles.fragment.glsl"
@@ -41,14 +44,19 @@ $ ->
 
   }, {
 
-    max_count : 32
+    # Constants
     pi        : 3.14.toFixed(8)
+
+    # World dimensions
     factor    : factor.toFixed(8)
     lobound   : 0.toFixed(8)
     hibound   : factor.toFixed(8)
     sizex     : size[0].toFixed(8)
     sizey     : size[1].toFixed(8)
     count     : count.toFixed(8)
+    grid_size : (factor / h).toFixed(8)
+
+    # SPH parameters
     h         : h.toFixed(8)
     m         : m.toFixed(8)
     h2        : Math.pow(h, 2).toFixed(8)
@@ -56,7 +64,6 @@ $ ->
     h9        : Math.pow(h, 9).toFixed(8)
     k         : 0.1.toFixed(8)
     r0        : 10.toFixed(8)
-    grid_size : (factor / h).toFixed(8)
 
   }, (p) ->
 
@@ -80,9 +87,7 @@ $ ->
     c.doubleFramebuffer('grid', size: size)
     c.doubleFramebuffer('particles', size: size)
     c.doubleFramebuffer('velocities', size: size)
-
-    eachCell (i, j, k) ->
-      c.framebuffer("accessor_#{i}_#{j}_#{k}", size: size)
+    eachCell (i, j, k) -> c.framebuffer("accessor_#{i}_#{j}_#{k}", size: size)
 
     # Bootstrap
     c.pass(p.fill, 'back particles')
@@ -100,7 +105,7 @@ $ ->
       # Sorting
       sortSpread = 2
       while sortSpread <= count
-        c.pass(p.bitonic, 'switch grid', {
+        c.pass(p.bitonicSort, 'switch grid', {
           target: 'auto grid'
         }, ({prog}) ->
           prog.sendFloat 'spread', sortSpread
@@ -109,7 +114,7 @@ $ ->
         mergeSpread = sortSpread / 2
         sortSpread *= 2
         while mergeSpread >= 2
-          c.pass(p.bitonic, 'switch grid', {
+          c.pass(p.bitonicSort, 'switch grid', {
             target: 'auto grid'
           }, ({prog}) ->
             prog.sendFloat 'spread', mergeSpread
@@ -117,8 +122,6 @@ $ ->
           )
           mergeSpread /= 2
 
-      c.pass(p.zero, 'auto densities')
-      c.pass(p.zero, 'auto pressures')
 
       eachCell (i, j, k) ->
         c.pass(p.genAccessor, "accessor_#{i}_#{j}_#{k}", {
@@ -128,6 +131,7 @@ $ ->
           prog.sendFloat3 'cmpCell', [i, j, k]
         )
 
+      c.pass(p.zero, 'auto densities')
       eachCell (i, j, k) ->
         c.pass(p.gridDensities, 'switch densities', {
           particles: 'back particles'
@@ -136,6 +140,7 @@ $ ->
           densities: 'auto densities'
         })
 
+      c.pass(p.zero, 'auto pressures')
       eachCell (i, j, k) ->
         c.pass(p.gridPressures, 'switch pressures', {
           particles: 'back particles'
