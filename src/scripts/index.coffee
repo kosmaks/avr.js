@@ -2,11 +2,12 @@ $ ->
 
   indent = (x) -> x?()
   #size   = [4, 4]
-  size   = [32, 32]
+  size   = [64, 64]
   count  = size[0] * size[1]
   factor = 100
-  h      = 10
-  m      = 0.00001
+  h      = 20
+  m      = 1
+  u      = 1
   debug  = false
 
   eachCell = (cb) ->
@@ -24,13 +25,14 @@ $ ->
     display   : "shaders/display.glsl"
 
     # Neighbour search
-    genGridCells: "shaders/gen_grid_cells.glsl"
-    genAccessor : "shaders/gen_accessor.glsl"
-    bitonicSort : "shaders/bitonic.glsl"
+    genGridCells : "shaders/gen_grid_cells.glsl"
+    genAccessor  : "shaders/gen_accessor.glsl"
+    bitonicSort  : "shaders/bitonic.glsl"
 
     # SPH
     gridDensities : "shaders/grid_densities.glsl"
     gridPressures : "shaders/grid_pressures.glsl"
+    gridViscosity : "shaders/viscosity.glsl"
     densities : "shaders/densities.glsl"
     gpressure : "shaders/gpressure.glsl"
     velocity  : "shaders/velocity.glsl"
@@ -55,15 +57,14 @@ $ ->
     sizey     : size[1].toFixed(8)
     count     : count.toFixed(8)
     grid_size : (factor / h).toFixed(8)
+    scale     : 0.0004
 
     # SPH parameters
     h         : h.toFixed(8)
     m         : m.toFixed(8)
-    h2        : Math.pow(h, 2).toFixed(8)
-    h2        : Math.pow(h, 6).toFixed(8)
-    h9        : Math.pow(h, 9).toFixed(8)
-    k         : 0.1.toFixed(8)
-    r0        : 10.toFixed(8)
+    k         : 0.006.toFixed(8)
+    r0        : 1.toFixed(8)
+    u         : u.toFixed(8)
 
   }, (p) ->
 
@@ -87,6 +88,7 @@ $ ->
     c.doubleFramebuffer('grid', size: size)
     c.doubleFramebuffer('particles', size: size)
     c.doubleFramebuffer('velocities', size: size)
+    c.doubleFramebuffer('viscosity', size: size)
     eachCell (i, j, k) -> c.framebuffer("accessor_#{i}_#{j}_#{k}", size: size)
 
     # Bootstrap
@@ -94,7 +96,7 @@ $ ->
     c.pass(p.zero, 'back velocities')
 
     #$("#next").click ->
-    avr.drawLoop 16, ->
+    avr.drawLoop 30, ->
     #indent ->
  
       # Generating cell indexes
@@ -150,6 +152,17 @@ $ ->
           pressures: 'auto pressures'
         })
 
+      c.pass(p.zero, 'auto viscosity')
+      eachCell (i, j, k) ->
+        c.pass(p.gridViscosity, 'switch viscosity', {
+          viscosity: 'auto viscosity'
+          velocities: 'back velocities'
+          densities: 'auto densities'
+          particles: 'back particles'
+          grid: 'auto grid'
+          accessor: "accessor_#{i}_#{j}_#{k}"
+        })
+
       #c.pass(p.densities, 'auto densities', {
         #particles: 'back particles'
       #})
@@ -163,6 +176,8 @@ $ ->
       c.pass(p.velocity, 'front velocities', {
         back: 'back velocities'
         particles: 'back particles'
+        pressures: 'auto pressures'
+        viscosity: 'auto viscosity'
       })
 
       # Calculating new position
@@ -173,7 +188,7 @@ $ ->
 
       # Display
 
-      toDebug = 'auto pressures'
+      toDebug = 'auto densities'
       if debug
         pixels = c.getBuffer(toDebug).getPixels()
         str = ""; line = ""
@@ -199,7 +214,7 @@ $ ->
 
       avr.clear()
       p.particles.use (prog) ->
-        prog.sendInt('positions', c.getBuffer('front particles').activeTexture(0))
+        prog.sendInt('positions', c.getBuffer('back particles').activeTexture(0))
         prog.sendInt('colors', c.getBuffer(toDebug).activeTexture(1))
         prog.drawBuffer(partsBuf, vars: 2)
 

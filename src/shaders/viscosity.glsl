@@ -1,12 +1,12 @@
 precision mediump float;
+varying vec2 index;
+uniform sampler2D viscosity;
+uniform sampler2D velocities;
+uniform sampler2D densities;
 uniform sampler2D particles;
-uniform sampler2D pressures;
 uniform sampler2D grid;
 uniform sampler2D accessor;
-uniform sampler2D densities;
-varying vec2 index;
 
-#define PRES(x) ($k * (x - $r0))
 #define UV(v) (vec2(v.x / $sizex, v.y / $sizey))
 #define SCALE(x) ((x) * $scale)
 
@@ -22,15 +22,14 @@ vec2 incBy(vec2 source, float value) {
 }
 
 void main() {
+  vec3 prevViscosity = texture2D(viscosity, index).xyz;
   vec3 curPart = texture2D(particles, index).xyz * $scale;
+  vec3 curVelocity = texture2D(velocities, index).xyz;
+  float curDensity = texture2D(densities, index).y;
   vec3 neiDescriptor = texture2D(accessor, index).xyz;
-  vec3 prevPressure = texture2D(pressures, index).xyz;
-  float curDens = texture2D(densities, index).y;
-  float curPres = PRES(curDens) / pow(curDens, 2.);
 
-  int count = 0;
-  float coef = - 45. / ($pi * pow(SCALE($h), 6.));
   vec3 result = vec3(0., 0., 0.);
+  float coef = $m * (45. / ($pi * pow(SCALE($h), 6.)));
 
   if (neiDescriptor.x >= 0.)
     for (float x = 0.; x >= 0.; x += 1.) {
@@ -40,20 +39,20 @@ void main() {
       vec2 neiIndex = texture2D(grid, gridIndex).xy;
       vec3 neiPart = texture2D(particles, neiIndex).xyz * $scale;
       float dist = distance(curPart, neiPart);
-      if (dist >= SCALE($h) || abs(dist) < 0.0001) continue;
+      if (dist >= SCALE($h)) continue;
 
-      float neiDens = texture2D(densities, neiIndex).y;
-      if (abs(neiDens) > 0.) {
-        float neiPres = PRES(neiDens) / pow(neiDens, 2.);
-        vec3 scaled = (curPart - neiPart) / dist;
-        result += $m 
-                * (curPres + neiPres) 
-                * (coef * pow(SCALE($h) - dist, 2.) * scaled); 
-      }
+      vec3 neiVelocity = texture2D(velocities, neiIndex).xyz;
+      float neiDensity = texture2D(densities, index).y;
+      if (abs(neiDensity) > 0.)
+        result += coef * (SCALE($h) - dist) * (neiVelocity - curVelocity) / neiDensity;
     }
 
+  if (abs(curDensity) > 0.)
+    result *= $u / curDensity;
+
+
   gl_FragColor = vec4(
-    prevPressure + result,
+    prevViscosity + result,
     1.
   );
 }
