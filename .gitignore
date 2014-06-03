@@ -5,4 +5,5 @@
 .DS_Store
 out/*
 out/
+src/sandbox/
 node_modules/
