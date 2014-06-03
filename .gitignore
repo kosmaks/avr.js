@@ -3,5 +3,6 @@
 *.swo
 
 .DS_Store
+out/*
 out/
 node_modules/
