@@ -20,6 +20,12 @@ avr.loadPrograms({
 });
 ```
 
+Examples
+--------
+
+* SPH fluid simulation logo: http://avr.kosmaks.com
+* Fuzzy c-means clustering: http://splitcity.kosmaks.com
+
 Simple chain
 ------------
 
