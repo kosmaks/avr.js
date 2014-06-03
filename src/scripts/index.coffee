@@ -1,13 +1,13 @@
 $ ->
 
   indent = (x) -> x?()
-  #size   = [4, 4]
   size   = [64, 64]
   count  = size[0] * size[1]
   factor = 100
-  h      = 20
+  h      = 5
   m      = 1
-  u      = 1
+  u      = 10
+  scale  = 0.004
   debug  = false
 
   eachCell = (cb) ->
@@ -51,19 +51,21 @@ $ ->
 
     # World dimensions
     factor    : factor.toFixed(8)
-    lobound   : 0.toFixed(8)
-    hibound   : factor.toFixed(8)
+    lobound   : 10.toFixed(8)
+    hibound   : (factor - 10).toFixed(8)
+    bound     : (factor * scale).toFixed(8)
     sizex     : size[0].toFixed(8)
     sizey     : size[1].toFixed(8)
     count     : count.toFixed(8)
     grid_size : (factor / h).toFixed(8)
-    scale     : 0.0004
+    scale     : scale.toFixed(8)
 
     # SPH parameters
+    max_part  : 32.toFixed(8)
     h         : h.toFixed(8)
-    m         : m.toFixed(8)
-    k         : 0.006.toFixed(8)
-    r0        : 1.toFixed(8)
+    m         : m.toFixed(16)
+    k         : 0.002.toFixed(8)
+    r0        : 100000.toFixed(16)
     u         : u.toFixed(8)
 
   }, (p) ->
@@ -94,14 +96,31 @@ $ ->
     # Bootstrap
     c.pass(p.fill, 'back particles')
     c.pass(p.zero, 'back velocities')
+    c.pass(p.zero, 'auto densities')
+    c.pass(p.zero, 'auto pressures')
+    c.pass(p.zero, 'auto viscosity')
 
     #$("#next").click ->
     avr.drawLoop 30, ->
     #indent ->
+
+      # Calculating new velocities
+      c.pass(p.velocity, 'front velocities', {
+        back: 'back velocities'
+        particles: 'back particles'
+        pressures: 'auto pressures'
+        viscosity: 'auto viscosity'
+      })
+
+      # Calculating new position
+      c.pass(p.position, 'front particles', {
+        back: 'back particles'
+        velocities: 'front velocities'
+      })
  
       # Generating cell indexes
       c.pass(p.genGridCells, 'auto grid', {
-        particles: 'back particles'
+        particles: 'front particles'
       })
 
       # Sorting
@@ -124,44 +143,52 @@ $ ->
           )
           mergeSpread /= 2
 
+      c.pass(p.zero, 'auto densities')
+      c.pass(p.zero, 'auto pressures')
+      c.pass(p.zero, 'auto viscosity')
 
       eachCell (i, j, k) ->
         c.pass(p.genAccessor, "accessor_#{i}_#{j}_#{k}", {
-          particles: 'back particles',
+          particles: 'front particles',
           grid: 'auto grid'
         }, ({prog}) ->
           prog.sendFloat3 'cmpCell', [i, j, k]
         )
 
-      c.pass(p.zero, 'auto densities')
       eachCell (i, j, k) ->
         c.pass(p.gridDensities, 'switch densities', {
-          particles: 'back particles'
+          particles: 'front particles'
           grid: 'auto grid'
           accessor: "accessor_#{i}_#{j}_#{k}"
           densities: 'auto densities'
         })
 
-      c.pass(p.zero, 'auto pressures')
       eachCell (i, j, k) ->
         c.pass(p.gridPressures, 'switch pressures', {
-          particles: 'back particles'
+          particles: 'front particles'
           grid: 'auto grid'
           accessor: "accessor_#{i}_#{j}_#{k}"
           densities: 'auto densities'
           pressures: 'auto pressures'
         })
 
-      c.pass(p.zero, 'auto viscosity')
       eachCell (i, j, k) ->
         c.pass(p.gridViscosity, 'switch viscosity', {
           viscosity: 'auto viscosity'
-          velocities: 'back velocities'
+          velocities: 'front velocities'
           densities: 'auto densities'
-          particles: 'back particles'
+          particles: 'front particles'
           grid: 'auto grid'
           accessor: "accessor_#{i}_#{j}_#{k}"
         })
+      #c.pass(p.gridViscosity, 'switch viscosity', {
+        #velocities: 'front velocities'
+        #particles: 'front particles'
+        #viscosity: 'auto viscosity'
+        #densities: 'auto densities'
+        #grid: 'auto grid'
+        #accessor: "accessor_0_0_0"
+      #})
 
       #c.pass(p.densities, 'auto densities', {
         #particles: 'back particles'
@@ -172,36 +199,24 @@ $ ->
         #densities: 'auto densities'
       #})
 
-      # Calculating new velocities
-      c.pass(p.velocity, 'front velocities', {
-        back: 'back velocities'
-        particles: 'back particles'
-        pressures: 'auto pressures'
-        viscosity: 'auto viscosity'
-      })
-
-      # Calculating new position
-      c.pass(p.position, 'front particles', {
-        back: 'back particles'
-        velocities: 'front velocities'
-      })
-
       # Display
 
-      toDebug = 'auto densities'
+      toDebug = 'auto particles'
+
       if debug
         pixels = c.getBuffer(toDebug).getPixels()
         str = ""; line = ""
         i = 0
         printers = {
-          fn0: (x) -> "(#{(x/255).toFixed(3)},"
-          fn1: (x) -> "#{(x/255).toFixed(3)})"
-          fn2: (x) -> (Math.pow(factor / h, 3) * x / 255.0).toFixed(2)
-          #fn2: (x) -> (x/255).toFixed(3)
+          fn0: (x) -> "(#{(x/255).toFixed(2)},"
+          fn1: (x) -> "#{(x/255).toFixed(2)})"
+          #fn2: (x) -> (Math.pow(factor / h, 3) * x / 255.0).toFixed(2)
+          fn2: (x) -> (x/255).toFixed(2)
           #fn2: (x) -> (8 * x/255).toFixed(2)
-          fn3: (x) -> if x == 0 then "not found" else "found"
+          #fn3: (x) -> if x == 0 then "not found" else "found"
         }
 
+        $("#debug").html(pixels[4 * 2 + 1] / 255)
         for pix in pixels
           fn = printers["fn#{i % 4}"]
           str += fn(pix) + " " if fn?
@@ -214,7 +229,7 @@ $ ->
 
       avr.clear()
       p.particles.use (prog) ->
-        prog.sendInt('positions', c.getBuffer('back particles').activeTexture(0))
+        prog.sendInt('positions', c.getBuffer('front particles').activeTexture(0))
         prog.sendInt('colors', c.getBuffer(toDebug).activeTexture(1))
         prog.drawBuffer(partsBuf, vars: 2)
 

@@ -7,52 +7,60 @@ uniform sampler2D particles;
 uniform sampler2D grid;
 uniform sampler2D accessor;
 
-#define UV(v) (vec2(v.x / $sizex, v.y / $sizey))
-#define SCALE(x) ((x) * $scale)
+$include "shaders/grid_helpers.glsl"
 
-vec2 incBy(vec2 source, float value) {
-  source = floor(source);
-  float wide = source.x + value;
-  vec2 res = vec2(
-    mod(wide, $sizex),
-    source.y + floor(wide / $sizex)
-  );
-  if (res.y >= $sizey) return vec2(0., 0.);
-  return res;
+float coef = $m * (45. / ($pi * pow(H, 6.)));
+vec3 curPart, curVelocity;
+float curDensity;
+vec3 debug = vec3(0., 0., 0.);
+
+vec3 handleNeighbour(vec3 neiPart, vec3 neiVelocity, float neiDensity) {
+  float dist = distance(curPart, neiPart);
+  if (dist < H && neiDensity != 0.) {
+    return coef * (H - dist) * (neiVelocity - curVelocity) / neiDensity;
+  }
+  return vec3(0., 0., 0.);
 }
+
 
 void main() {
   vec3 prevViscosity = texture2D(viscosity, index).xyz;
-  vec3 curPart = texture2D(particles, index).xyz * $scale;
-  vec3 curVelocity = texture2D(velocities, index).xyz;
-  float curDensity = texture2D(densities, index).y;
+  curPart = texture2D(particles, index).xyz * $scale;
+  curVelocity = texture2D(velocities, index).xyz;
+  curDensity = texture2D(densities, index).y;
   vec3 neiDescriptor = texture2D(accessor, index).xyz;
 
   vec3 result = vec3(0., 0., 0.);
-  float coef = $m * (45. / ($pi * pow(SCALE($h), 6.)));
 
-  if (neiDescriptor.x >= 0.)
+  if (neiDescriptor.z > 0.)
     for (float x = 0.; x >= 0.; x += 1.) {
-      if (x >= neiDescriptor.z) break;
+      if (x >= neiDescriptor.z || x >= $max_part) break;
 
       vec2 gridIndex = UV(incBy(neiDescriptor.xy, x));
       vec2 neiIndex = texture2D(grid, gridIndex).xy;
       vec3 neiPart = texture2D(particles, neiIndex).xyz * $scale;
-      float dist = distance(curPart, neiPart);
-      if (dist >= SCALE($h)) continue;
-
+      float neiDensity = texture2D(densities, neiIndex).y;
       vec3 neiVelocity = texture2D(velocities, neiIndex).xyz;
-      float neiDensity = texture2D(densities, index).y;
-      if (abs(neiDensity) > 0.)
-        result += coef * (SCALE($h) - dist) * (neiVelocity - curVelocity) / neiDensity;
+      /*debug = neiPart / $scale / $factor;*/
+
+      vec3 yNeg = vec3(1., -1., 1.);
+      result += handleNeighbour(neiPart, neiVelocity, neiDensity);
+      result += handleNeighbour(
+        project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.)), 
+        neiVelocity * yNeg, 
+        neiDensity
+      );
     }
 
-  if (abs(curDensity) > 0.)
+  if (curDensity != 0.)
     result *= $u / curDensity;
-
 
   gl_FragColor = vec4(
     prevViscosity + result,
+    /*curPart / $scale / $factor,*/
+    /*debug,*/
+    /*0.,*/
+    /*0.,*/
     1.
   );
 }

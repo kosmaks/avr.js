@@ -5,46 +5,51 @@ uniform sampler2D grid;
 uniform sampler2D accessor;
 uniform sampler2D densities;
 
-#define UV(v) (vec2(v.x / $sizex, v.y / $sizey))
-#define SCALE(x) ((x) * $scale)
+$include "shaders/grid_helpers.glsl"
 
-vec2 incBy(vec2 source, float value) {
-  source = floor(source);
-  float wide = source.x + value;
-  vec2 res = vec2(
-    mod(wide, $sizex),
-    source.y + floor(wide / $sizex)
-  );
-  if (res.y >= $sizey) return vec2(0., 0.);
-  return res;
+float coef = 315. / (64. * 3.14 * pow(SCALE($h), 9.));
+float h2 = pow(H, 2.);
+vec3 curPart;
+
+float debug = 0.;
+
+float handleNeighbour(vec3 neiPart) {
+  float dist = distance(curPart, neiPart);
+  if (dist < H) {
+    debug = 1.;
+    float length2 = pow(dist, 2.);
+    return $m * coef * pow(h2 - length2, 3.);
+  }
+  return 0.;
 }
 
 void main() {
+  float prevCount = texture2D(densities, index).x;
   float prevDensity = texture2D(densities, index).y;
-  vec3 curPart = texture2D(particles, index).xyz * $scale;
   vec3 neiDescriptor = texture2D(accessor, index).xyz;
 
-  float result = 0.;
-  float coef = 315. / (64. * 3.14 * pow(SCALE($h), 9.));
+  curPart = texture2D(particles, index).xyz * $scale;
 
-  if (neiDescriptor.x >= 0.)
+  float result = 0.;
+
+  if (neiDescriptor.z > 0.)
     for (float x = 0.; x >= 0.; x += 1.) {
-      if (x >= neiDescriptor.z) break;
+      if (x >= neiDescriptor.z || x >= $max_part) break;
 
       vec2 gridIndex = UV(incBy(neiDescriptor.xy, x));
       vec2 neiIndex = texture2D(grid, gridIndex).xy;
       vec3 neiPart = texture2D(particles, neiIndex).xyz * $scale;
 
-      float dist = distance(curPart, neiPart);
-      if (dist < SCALE($h)) {
-        float length2 = pow(dist, 2.);
-        result += $m * coef * pow(pow(SCALE($h), 2.) - length2, 3.);
-      }
+      result += handleNeighbour(neiPart);
+      result += handleNeighbour(
+        project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.))
+      );
     }
 
+  /*float prevDebug = texture2D(densities, index).x;*/
   gl_FragColor = vec4(
     0.,
-    /*(prevDensity + result) * 100.,*/
+    /*prevDebug + debug,*/
     prevDensity + result,
     0.,
     1.

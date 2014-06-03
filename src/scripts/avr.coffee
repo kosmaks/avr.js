@@ -101,6 +101,8 @@ class AVR.Framebuffer extends AVR.GLContext
 
 class AVR.Context
 
+  cache = {}
+
   constructor: (@el) -> if @el?
     @gl = el.getContext 'experimental-webgl'
     @gl.getExtension 'OES_texture_float' if @ready()
@@ -132,21 +134,30 @@ class AVR.Context
     """
     @createProgram opts
 
+  getSource: (url, defines, cb) ->
+    url = url.toLowerCase()
+    if cache[url]?
+      cb? cache[url]
+    else
+      $.get url, {}, (data) =>
+        @shaderPreprocessor data, defines, (source) =>
+          cb?(cache[url] = source)
+
   loadProgram: ({vertexUrl, fragmentUrl}, defines = {}, cb) ->
-    $.get vertexUrl, {}, (vertex) =>
-      $.get fragmentUrl, {}, (fragment) =>
+    @getSource vertexUrl, defines, (vertex) =>
+      @getSource fragmentUrl, defines, (fragment) =>
         res = @createProgram({
-          fragment: @sourceReplace(fragment, defines),
-          vertex: @sourceReplace(vertex, defines)
+          fragment: fragment
+          vertex: vertex
         })
         res.vertexSource = vertex
         res.fragmentSource = fragment
         cb? res
 
   loadDisplayProgram: (fragmentUrl, defines = {}, cb) ->
-    $.get fragmentUrl, {}, (fragment) =>
+    @getSource fragmentUrl, defines, (fragment) =>
       res = @createDisplayProgram({
-        fragment: @sourceReplace(fragment, defines)
+        fragment: fragment
       })
       res.fragmentSource = fragment
       cb? res
@@ -155,6 +166,7 @@ class AVR.Context
     count = 0
     count++ for _, _ of progs
     result = {}
+
     for nameIter, info of progs
       ((name) =>
         loader = if typeof(info) == "object" \
@@ -165,6 +177,24 @@ class AVR.Context
           count -= 1
           cb? result if count <= 0
       )(nameIter)
+
+  shaderPreprocessor: (source, defines = {}, cb) ->
+    result = source
+    for name, value of defines
+      re = new RegExp("\\$#{name}", 'g')
+      result = result.replace(re, value)
+    re = /(^|\n)\$include\s(.*)/g
+    count = (result.match(re) ? []).length
+    sources = {}
+    if count <= 0
+      cb?(result)
+    else
+      result.replace re, (f, i, path) =>
+        @getSource $.parseJSON(path), defines, (data) =>
+          sources[path] = data
+          count -= 1
+          if count <= 0
+            cb?(result.replace re, (f, i, path) => sources[path])
 
   sourceReplace: (source, defines = {}) ->
     result = source
