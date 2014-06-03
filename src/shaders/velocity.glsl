@@ -4,6 +4,7 @@ uniform sampler2D particles;
 uniform sampler2D pressures;
 uniform sampler2D viscosity;
 varying vec2 index;
+uniform vec3 userDefined;
 
 vec3 gravity = vec3(0.0, -0.098, 0.00);
 
@@ -17,6 +18,7 @@ void main() {
   result += gravity;
   result -= curPressure;
   result += curViscosity;
+  result += userDefined;
 
 
   curPos += result;

@@ -17,7 +17,8 @@ void main() {
     /*gl_FragColor = vec4(index.x * 0.4 + 0.3, 0.6 + 0.1 * index.x, 0.3 + 0.4 * (index.y - 0.5) * 2., 1.) * $factor;*/
 
   /*gl_FragColor = vec4(index.x, 0.0, index.y, 1.) * $factor;*/
-  gl_FragColor = vec4(random(), random(), random(), 1.) * $factor;
+  gl_FragColor = vec4(index.x * 0.1 + 0.8, index.y * 5.0 + index.x * 5.0 + 1.0, index.y * 0.1 + 0.8, 1.) * $factor;
+  /*gl_FragColor = vec4(random(), random(), random(), 1.) * $factor;*/
   /*if (index.y < 0.5)*/
     /*gl_FragColor = vec4(index.x, 0.3, index.y * 2., 1.);*/
   /*else*/

@@ -32,9 +32,7 @@ $ ->
     # SPH
     gridDensities : "shaders/grid_densities.glsl"
     gridPressures : "shaders/grid_pressures.glsl"
-    gridViscosity : "shaders/viscosity.glsl"
-    densities : "shaders/densities.glsl"
-    gpressure : "shaders/gpressure.glsl"
+    gridViscosity : "shaders/grid_viscosity.glsl"
     velocity  : "shaders/velocity.glsl"
     position  : "shaders/position.glsl"
 
@@ -51,8 +49,8 @@ $ ->
 
     # World dimensions
     factor    : factor.toFixed(8)
-    lobound   : 10.toFixed(8)
-    hibound   : (factor - 10).toFixed(8)
+    lobound   : 1.toFixed(8)
+    hibound   : (factor - 1).toFixed(8)
     bound     : (factor * scale).toFixed(8)
     sizex     : size[0].toFixed(8)
     sizey     : size[1].toFixed(8)
@@ -64,7 +62,7 @@ $ ->
     max_part  : 32.toFixed(8)
     h         : h.toFixed(8)
     m         : m.toFixed(16)
-    k         : 0.002.toFixed(8)
+    k         : 0.003.toFixed(8)
     r0        : 100000.toFixed(16)
     u         : u.toFixed(8)
 
@@ -110,7 +108,13 @@ $ ->
         particles: 'back particles'
         pressures: 'auto pressures'
         viscosity: 'auto viscosity'
-      })
+      }, ({prog}) ->
+        prog.sendFloat3 'userDefined', [
+          if $("#moveRight").is(':checked') then 0.3 else 0,
+          0,
+          0
+        ]
+      )
 
       # Calculating new position
       c.pass(p.position, 'front particles', {
@@ -181,23 +185,6 @@ $ ->
           grid: 'auto grid'
           accessor: "accessor_#{i}_#{j}_#{k}"
         })
-      #c.pass(p.gridViscosity, 'switch viscosity', {
-        #velocities: 'front velocities'
-        #particles: 'front particles'
-        #viscosity: 'auto viscosity'
-        #densities: 'auto densities'
-        #grid: 'auto grid'
-        #accessor: "accessor_0_0_0"
-      #})
-
-      #c.pass(p.densities, 'auto densities', {
-        #particles: 'back particles'
-      #})
-
-      #c.pass(p.gpressure, 'auto pressures', {
-        #particles: 'back particles'
-        #densities: 'auto densities'
-      #})
 
       # Display
 

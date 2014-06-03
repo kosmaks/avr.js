@@ -7,16 +7,13 @@ uniform sampler2D densities;
 
 $include "shaders/grid_helpers.glsl"
 
-float coef = 315. / (64. * 3.14 * pow(SCALE($h), 9.));
+float coef = 315. / (64. * 3.14 * pow(H, 9.));
 float h2 = pow(H, 2.);
 vec3 curPart;
-
-float debug = 0.;
 
 float handleNeighbour(vec3 neiPart) {
   float dist = distance(curPart, neiPart);
   if (dist < H) {
-    debug = 1.;
     float length2 = pow(dist, 2.);
     return $m * coef * pow(h2 - length2, 3.);
   }
@@ -41,15 +38,13 @@ void main() {
       vec3 neiPart = texture2D(particles, neiIndex).xyz * $scale;
 
       result += handleNeighbour(neiPart);
-      result += handleNeighbour(
-        project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.))
-      );
+      /*result += handleNeighbour(*/
+        /*project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.))*/
+      /*);*/
     }
 
-  /*float prevDebug = texture2D(densities, index).x;*/
   gl_FragColor = vec4(
     0.,
-    /*prevDebug + debug,*/
     prevDensity + result,
     0.,
     1.

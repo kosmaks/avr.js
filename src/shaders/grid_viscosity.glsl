@@ -45,11 +45,11 @@ void main() {
 
       vec3 yNeg = vec3(1., -1., 1.);
       result += handleNeighbour(neiPart, neiVelocity, neiDensity);
-      result += handleNeighbour(
-        project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.)), 
-        neiVelocity * yNeg, 
-        neiDensity
-      );
+      /*result += handleNeighbour(*/
+        /*project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.)), */
+        /*neiVelocity * yNeg, */
+        /*neiDensity*/
+      /*);*/
     }
 
   if (curDensity != 0.)

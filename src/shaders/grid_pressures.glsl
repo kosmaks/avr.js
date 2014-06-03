@@ -11,7 +11,6 @@ $include "shaders/grid_helpers.glsl"
 float coef = - 45. / ($pi * pow(H, 6.));
 vec3 curPart;
 float curDens, curPres;
-float debug = 0.;
 
 vec3 handleNeighbour(vec3 neiPart, float neiDens) {
   float dist = distance(curPart, neiPart);
@@ -46,21 +45,14 @@ void main() {
       float neiDens = texture2D(densities, neiIndex).y;
 
       result += handleNeighbour(neiPart, neiDens);
-      result += handleNeighbour(
-        project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.)), 
-        neiDens
-      );
+      /*result += handleNeighbour(*/
+        /*project(neiPart, vec3(0., $lobound * $scale, 0.), vec3(0., 1., 0.)), */
+        /*neiDens*/
+      /*);*/
     }
 
   gl_FragColor = vec4(
     prevPressure + result,
     1.
   );
-  /*gl_FragColor = vec4(*/
-    /*prevPressure.x + (debug / 100.),*/
-    /*[>prevPressure.x + float(count),<]*/
-    /*[>prevPressure.x + neiDescriptor.x,<]*/
-    /*0., 0., 1.*/
-    /*[>.<]*/
-  /*);*/
 }
