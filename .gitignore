@@ -2,6 +2,14 @@
 *.swn
 *.swo
 
+*._aux
+*._log
+*.aux
+*.log
+*.synctex.gz
+*.toc
+*.pdf
+
 .DS_Store
 out/*
 out/

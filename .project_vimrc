@@ -1,0 +1,7 @@
+autocmd FileType tex :set spell
+autocmd FileType tex :setlocal spell spelllang=ru_ru
+autocmd FileType tex :syntax spell toplevel
+autocmd BufEnter,BufWrite,InsertLeave *.tex :TEX
+
+noremap ql :silent !qlmanage -p doc/index.pdf<CR>
+noremap йд :silent !qlmanage -p doc/index.pdf<CR>

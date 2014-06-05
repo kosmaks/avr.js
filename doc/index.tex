@@ -1,23 +1,30 @@
-\documentclass{report}
+\documentclass[a4paper,14pt,russian,nocolumnsxix,nocolumnxxxii,nocolumnxxxi,hpadding=10mm]{eskdtext}
 
+\usepackage{cmap}
 \usepackage[T2A]{fontenc}
 \usepackage[utf8x]{inputenc}
-\usepackage[english,russian]{babel}
+\usepackage[russian]{babel}
 
+\usepackage{graphicx}
 
-\renewcommand{\theenumi}{\arabic{enumi}}% Меняем везде перечисления на цифра.цифра
-\renewcommand{\labelenumi}{\arabic{enumi}}% Меняем везде перечисления на цифра.цифра
-\renewcommand{\theenumii}{.\arabic{enumii}}% Меняем везде перечисления на цифра.цифра
-\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}.}% Меняем везде перечисления на цифра.цифра
-\renewcommand{\theenumiii}{.\arabic{enumiii}}% Меняем везде перечисления на цифра.цифра
-\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.}% Меняем везде перечисления на цифра.цифра
+\renewcommand{\theenumi}{\arabic{enumi}} % Меняем везде перечисления на цифра.цифра
+\renewcommand{\labelenumi}{\arabic{enumi}} % Меняем везде перечисления на цифра.цифра
+\renewcommand{\theenumii}{.\arabic{enumii}} % Меняем везде перечисления на цифра.цифра
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}.} % Меняем везде перечисления на цифра.цифра
+\renewcommand{\theenumiii}{.\arabic{enumiii}} % Меняем везде перечисления на цифра.цифра
+\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.} % Меняем везде перечисления на цифра.цифра
 
-\title{Алогритмизация визуальных представлений}
-\author{Костюченко Максим}
-\date{Июнь 2015}
+% Font settings
+\linespread{1.3} % 1.5
+\renewcommand{\rmdefault}{ftm} % Times new roman
+\frenchspacing
+%\ESKDsectStyle{section}{\normalsize} % Заголовки глав обычным шрифтом
+%\ESKDsectStyle{subsection}{\normalsize} % Заголовки разделов обычным шрифтом
+%\ESKDsectStyle{subsubsection}{\normalsize} % Заголовки подразделов обычным шрифтом
+
+\input{title}
 
 \begin{document}
-  \input{title}
-  \newpage
+  \maketitle
   \tableofcontents 
 \end{document}
