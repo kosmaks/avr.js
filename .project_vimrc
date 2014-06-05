@@ -5,3 +5,6 @@ autocmd BufEnter,BufWrite,InsertLeave *.tex :TEX
 
 noremap ql :silent !qlmanage -p doc/index.pdf<CR>
 noremap йд :silent !qlmanage -p doc/index.pdf<CR>
+
+let NERDTreeIgnore = ['\._aux$', '\.aux$', '\._log$', '\.log$', '\.synctex.gz$', '\.toc$', '\.pdf$']
+set wildignore+=*._aux,*.aux,*._log,*.log,*.synctex.gz,*.toc,*.pdf
