@@ -13,5 +13,6 @@
 .DS_Store
 out/*
 out/
+doc/.tmp
 src/sandbox/
 node_modules/
