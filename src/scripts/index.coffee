@@ -1,14 +1,15 @@
 $ ->
 
   indent = (x) -> x?()
-  size   = [64, 64]
+  size   = [128, 64]
   count  = size[0] * size[1]
-  factor = 100
+  factor = 150
   h      = 5
   m      = 1
   u      = 10
   scale  = 0.004
   debug  = false
+  time   = 0
 
   eachCell = (cb) ->
     for i in [-1..1]
@@ -59,10 +60,10 @@ $ ->
     scale     : scale.toFixed(8)
 
     # SPH parameters
-    max_part  : 32.toFixed(8)
+    max_part  : 30.toFixed(8)
     h         : h.toFixed(8)
     m         : m.toFixed(16)
-    k         : 0.003.toFixed(8)
+    k         : 0.007.toFixed(8)
     r0        : 100000.toFixed(16)
     u         : u.toFixed(8)
 
@@ -99,7 +100,7 @@ $ ->
     c.pass(p.zero, 'auto viscosity')
 
     #$("#next").click ->
-    avr.drawLoop 30, ->
+    avr.drawLoop 40, ->
     #indent ->
 
       # Calculating new velocities
@@ -190,32 +191,10 @@ $ ->
 
       toDebug = 'auto particles'
 
-      if debug
-        pixels = c.getBuffer(toDebug).getPixels()
-        str = ""; line = ""
-        i = 0
-        printers = {
-          fn0: (x) -> "(#{(x/255).toFixed(2)},"
-          fn1: (x) -> "#{(x/255).toFixed(2)})"
-          #fn2: (x) -> (Math.pow(factor / h, 3) * x / 255.0).toFixed(2)
-          fn2: (x) -> (x/255).toFixed(2)
-          #fn2: (x) -> (8 * x/255).toFixed(2)
-          #fn3: (x) -> if x == 0 then "not found" else "found"
-        }
-
-        $("#debug").html(pixels[4 * 2 + 1] / 255)
-        for pix in pixels
-          fn = printers["fn#{i % 4}"]
-          str += fn(pix) + " " if fn?
-          i += 1
-          if i % 4 == 0
-            str += "| "
-          if i % (size[0] * 4) == 0
-            str += "\n"
-        console.log str
-
       avr.clear()
       p.particles.use (prog) ->
+        time += 1
+        prog.sendFloat('time', time)
         prog.sendInt('positions', c.getBuffer('front particles').activeTexture(0))
         prog.sendInt('colors', c.getBuffer(toDebug).activeTexture(1))
         prog.drawBuffer(partsBuf, vars: 2)
