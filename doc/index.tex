@@ -6,6 +6,8 @@
 \usepackage[russian]{babel}
 \usepackage{lastpage}
 \usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
 
 \renewcommand{\theenumi}{\arabic{enumi}} % Меняем везде перечисления на цифра.цифра
 \renewcommand{\labelenumi}{\arabic{enumi}} % Меняем везде перечисления на цифра.цифра
@@ -30,11 +32,11 @@
 \begin{document}
   %\maketitle
   %\input{annotation}
-  %\input{intro} % 1 -> 2
-  %\input{analogues} % 2
-  %\input{gpu} % 4 -> 5?? (pictures)
+  \input{intro} % 1 -> 2
   \input{specification}
-  %\input{realization} % 2 -> 5
+  \input{analogues} % 2
+  \input{gpu} % 4 -> 5?? (pictures)
+  \input{realization} % 2 -> 5
   \newpage
 
   %\section{Техническое задание} % 2
