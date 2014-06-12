@@ -23,9 +23,9 @@
 \linespread{1.3} % 1.5
 \renewcommand{\rmdefault}{ftm} % Times new roman
 \frenchspacing
-%\ESKDsectStyle{section}{\normalsize} % Заголовки глав обычным шрифтом
-%\ESKDsectStyle{subsection}{\normalsize} % Заголовки разделов обычным шрифтом
-%\ESKDsectStyle{subsubsection}{\normalsize} % Заголовки подразделов обычным шрифтом
+%\ESKDsectStyle{section}{\\upshape} % Заголовки глав обычным шрифтом
+\ESKDsectStyle{subsection}{\normalsize} % Заголовки разделов обычным шрифтом
+\ESKDsectStyle{subsubsection}{\normalsize} % Заголовки подразделов обычным шрифтом
 
 \input{title}
 
@@ -33,10 +33,10 @@
   %\maketitle
   %\input{annotation}
   \input{intro} % 1 -> 2
-  \input{specification}
+  \input{specification} % 2
   \input{analogues} % 2
   \input{gpu} % 4 -> 5?? (pictures)
-  \input{realization} % 2 -> 5
+  \input{realization} % 7
   \newpage
 
   %\section{Техническое задание} % 2
@@ -46,7 +46,6 @@
   \section{Примеры использования} % 3
   \subsection{Учебные курсы}
   \subsection{Визуальные представления в экспертных системах}
-  \subsection{Кластеризация поисковой выдачи в ГИС}
   \section{Руководство по использованию} % 2
   \section{Заключение} % 2
   \newpage

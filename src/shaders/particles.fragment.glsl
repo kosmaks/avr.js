@@ -1,6 +1,6 @@
 precision mediump float;
 uniform sampler2D colors;
-varying vec2 index;
+varying vec3 index;
 varying vec3 position;
 varying vec3 realPos;
 
@@ -18,7 +18,11 @@ void main() {
     return;
   }
 
-  gl_FragColor = texture2D(colors, index) / $factor;
-  vec3 result = vec3(index.x, 0.5, index.y);
-  gl_FragColor = vec4(result, 0.7);
+  gl_FragColor = texture2D(colors, index.xy) / $factor;
+  /*vec3 result = vec3(index.x, 0.5, index.y);*/
+  /*gl_FragColor = vec4(result, 0.7);*/
+
+  /*gl_FragColor = (index.z > 0.5)*/
+               /*? vec4(1.0, 0.0, 0.0, 0.0)*/
+               /*: vec4(0.0, 0.0, 1.0, 1.0);*/
 }

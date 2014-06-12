@@ -1,6 +1,7 @@
 $ ->
 
   indent = (x) -> x?()
+  #size   = [16, 16]
   size   = [128, 64]
   count  = size[0] * size[1]
   factor = 150
@@ -38,6 +39,11 @@ $ ->
     position  : "shaders/position.glsl"
 
     # Rendering
+    axes: {
+      vertexUrl: "shaders/axes.vertex.glsl"
+      fragmentUrl: "shaders/axes.fragment.glsl"
+    }
+
     particles : {
       vertexUrl   : "shaders/particles.vertex.glsl"
       fragmentUrl : "shaders/particles.fragment.glsl"
@@ -63,7 +69,7 @@ $ ->
     max_part  : 30.toFixed(8)
     h         : h.toFixed(8)
     m         : m.toFixed(16)
-    k         : 0.007.toFixed(8)
+    k         : 0.004.toFixed(8)
     r0        : 100000.toFixed(16)
     u         : u.toFixed(8)
 
@@ -77,8 +83,40 @@ $ ->
         partsBuf.push(
           deltaI * i + (deltaI / 2.0),
           deltaJ * j + (deltaJ / 2.0),
+          0
         )
+        #partsBuf.push(
+          #deltaI * i + (deltaI / 2.0),
+          #deltaJ * j + (deltaJ / 2.0),
+          #1
+        #)
     partsBuf = avr.createBuffer(partsBuf)
+
+    axesBuf = [
+      0, 0, 0,
+      1, 0, 0, # x axis
+      1, 0, 0,
+      1, 1, 0, # y axis
+      1, 0, 0,
+      1, 0, 1, # z axis
+    ]
+    #axesBuf = []
+    #for i in [0..factor] by h
+      #cur = i / factor
+      #axesBuf.push(
+        #cur, 0, 0,
+        #cur, 1, 0
+      #)
+      #axesBuf.push(
+        #0, 0, cur,
+        #1, 0, cur
+      #)
+      #axesBuf.push(
+        #0, cur, 0,
+        #0, cur, 1
+      #)
+    axesBuf = avr.createBuffer(axesBuf)
+
 
     c = avr.createChain()
 
@@ -100,7 +138,7 @@ $ ->
     c.pass(p.zero, 'auto viscosity')
 
     #$("#next").click ->
-    avr.drawLoop 40, ->
+    avr.drawLoop 20, ->
     #indent ->
 
       # Calculating new velocities
@@ -112,7 +150,7 @@ $ ->
       }, ({prog}) ->
         prog.sendFloat3 'userDefined', [
           if $("#moveRight").is(':checked') then 0.3 else 0,
-          0,
+          if $("#moveRight").is(':checked') then 0.02 else 0,
           0
         ]
       )
@@ -192,11 +230,17 @@ $ ->
       toDebug = 'auto particles'
 
       avr.clear()
+      time += 1
+
+      p.axes.use (prog) ->
+        prog.sendFloat('time', time)
+        prog.drawBuffer(axesBuf, vars: 3, type: avr.gl.LINES)
+
       p.particles.use (prog) ->
-        time += 1
         prog.sendFloat('time', time)
         prog.sendInt('positions', c.getBuffer('front particles').activeTexture(0))
         prog.sendInt('colors', c.getBuffer(toDebug).activeTexture(1))
-        prog.drawBuffer(partsBuf, vars: 2)
+        prog.sendInt('vectors', c.getBuffer('front velocities').activeTexture(2))
+        prog.drawBuffer(partsBuf, vars: 3, type: avr.gl.POINTS)
 
       c.swapBuffers()

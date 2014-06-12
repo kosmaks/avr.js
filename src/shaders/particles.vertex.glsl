@@ -1,28 +1,29 @@
-attribute vec2 vertex;
+attribute vec3 vertex;
 uniform sampler2D positions;
 uniform sampler2D colors;
-uniform float time;
-varying vec2 index;
+uniform sampler2D vectors;
+varying vec3 index;
 /*varying vec3 position;*/
 varying vec3 realPos;
 
-float angle = (time / 2.) * $pi / 180.;
-mat3 rot = mat3(
-  cos(angle), 0., sin(angle),
-  0., 1., 0.,
-  -sin(angle), 0., cos(angle)
-);
+$include "shaders/transform.glsl"
 
 void main() {
-  index = vertex.xy;
+  index = vertex;
+  vec3 position = texture2D(positions, index.xy).xyz;
+  if (vertex.z > 0.5) {
+    vec3 vector = texture2D(vectors, index.xy).xyz;
+    position += vector * 3.0;
+  }
+  realPos = position;
+
   gl_PointSize = 3.;
-  gl_Position = texture2D(positions, index) / $factor;
-  realPos = gl_Position.xyz * $factor;
+  gl_Position = vec4(position, 1.) / $factor;
   gl_Position = gl_Position - 0.5;
   gl_Position.w = 1.;
 
-  gl_Position = vec4(rot * gl_Position.xyz, 1.);
-  gl_Position.w = gl_Position.z + 1.;
+  gl_Position = vec4(processPos(gl_Position.xyz), 1.);
+  gl_Position = perspective(gl_Position.xyz);
 
   /*position = gl_Position.xyz;*/
 }
