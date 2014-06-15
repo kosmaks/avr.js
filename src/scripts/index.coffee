@@ -92,32 +92,6 @@ $ ->
         #)
     partsBuf = avr.createBuffer(partsBuf)
 
-    axesBuf = [
-      0, 0, 0,
-      1, 0, 0, # x axis
-      1, 0, 0,
-      1, 1, 0, # y axis
-      1, 0, 0,
-      1, 0, 1, # z axis
-    ]
-    #axesBuf = []
-    #for i in [0..factor] by h
-      #cur = i / factor
-      #axesBuf.push(
-        #cur, 0, 0,
-        #cur, 1, 0
-      #)
-      #axesBuf.push(
-        #0, 0, cur,
-        #1, 0, cur
-      #)
-      #axesBuf.push(
-        #0, cur, 0,
-        #0, cur, 1
-      #)
-    axesBuf = avr.createBuffer(axesBuf)
-
-
     c = avr.createChain()
 
     # Generate buffers
@@ -232,9 +206,20 @@ $ ->
       avr.clear()
       time += 1
 
-      p.axes.use (prog) ->
-        prog.sendFloat('time', time)
-        prog.drawBuffer(axesBuf, vars: 3, type: avr.gl.LINES)
+      #avr.visualize(AVR.Axes)
+
+      #avr.visualize(avr.vectors({
+        #colors: [
+          #[1.0, 0.0, 0.0, 1.0]
+          #[0.0, 0.0, 1.0, 1.0]
+        #]
+        #particles: c.getBuffer('front particles')
+        #vectors: c.getBuffer('front velocities')
+      #}))
+
+      #p.axes.use (prog) ->
+        #prog.sendFloat('time', time)
+        #prog.drawBuffer(axesBuf, vars: 3, type: avr.gl.LINES)
 
       p.particles.use (prog) ->
         prog.sendFloat('time', time)
