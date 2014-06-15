@@ -6,6 +6,7 @@
 \usepackage[russian]{babel}
 \usepackage{lastpage}
 \usepackage{graphicx}
+\usepackage{longtable}
 \usepackage{amsmath}
 \usepackage{hyperref}
 
@@ -37,17 +38,9 @@
   \input{analogues} % 2
   \input{gpu} % 4 -> 5?? (pictures)
   \input{realization} % 7
-  \newpage
-
-  %\section{Техническое задание} % 2
-  %\section{Сравнение аналогов}
-  %\section{Особенности вычисления на GPU}
-  \section{Тестирование производительности} % 1
-  \section{Примеры использования} % 3
-  \subsection{Учебные курсы}
-  \subsection{Визуальные представления в экспертных системах}
-  \section{Руководство по использованию} % 2
-  \section{Заключение} % 2
+  \input{performance}
+  \input{usage}
+  \input{outro} 
   \newpage
   \tableofcontents 
 \end{document}
