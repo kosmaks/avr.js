@@ -9,11 +9,9 @@ class AVR.GLContext
 class AVR.Program extends AVR.GLContext
 
   sendFloat: (name, value) -> @gl.uniform1f @uniformLoc(name), value
-
   sendInt: (name, value) -> @gl.uniform1i @uniformLoc(name), value
-
+  sendInt2: (name, value) -> @gl.uniform2i @uniformLoc(name), value[0], value[1]
   sendFloat2: (name, value) -> @gl.uniform2f @uniformLoc(name), value[0], value[1]
-
   sendFloat3: (name, value) -> @gl.uniform3f @uniformLoc(name), value[0], value[1], value[2]
 
   drawBuffer: (buffer, {type, attrib, vars} = {}) ->
@@ -174,6 +172,7 @@ class AVR.Context
                  else 'loadDisplayProgram'
         @[loader] info, defines, (prog) ->
           result[name] = prog
+          result.constants = defines
           count -= 1
           cb? result if count <= 0
       )(nameIter)

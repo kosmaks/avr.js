@@ -1,6 +1,8 @@
 body {
-  padding-top: 50px;
+  padding-top: 25px;
   font: 14px verdana;
+  background: #222;
+  color: #fff;
 }
 
 h1 {
@@ -12,14 +14,13 @@ h1 {
   display: inline-block;
   margin-left: 25px;
   margin-top: -50px;
-  width: 700px;
-  height: 700px;
+  width: 600px;
+  height: 600px;
   border: none;
 }
 
 .jumbotron {
-  background: #555;
-  color: #fff;
+  background: transparent;
 }
 
 .faded {

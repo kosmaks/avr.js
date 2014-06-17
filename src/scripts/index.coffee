@@ -2,7 +2,7 @@ $ ->
 
   indent = (x) -> x?()
   #size   = [16, 16]
-  size   = [128, 64]
+  size   = [64, 64]
   count  = size[0] * size[1]
   factor = 150
   h      = 5
@@ -10,7 +10,7 @@ $ ->
   u      = 10
   scale  = 0.004
   debug  = false
-  time   = 0
+  wind   = false
 
   eachCell = (cb) ->
     for i in [-1..1]
@@ -43,10 +43,13 @@ $ ->
       vertexUrl: "shaders/axes.vertex.glsl"
       fragmentUrl: "shaders/axes.fragment.glsl"
     }
-
     particles : {
       vertexUrl   : "shaders/particles.vertex.glsl"
       fragmentUrl : "shaders/particles.fragment.glsl"
+    }
+    vectors : {
+      vertexUrl   : "shaders/vectors.vertex.glsl"
+      fragmentUrl : "shaders/vectors.fragment.glsl"
     }
 
   }, {
@@ -75,24 +78,20 @@ $ ->
 
   }, (p) ->
 
-    partsBuf = []
-    deltaI = 1.0 / size[0]
-    deltaJ = 1.0 / size[1]
-    for i in [0...size[0]]
-      for j in [0...size[1]]
-        partsBuf.push(
-          deltaI * i + (deltaI / 2.0),
-          deltaJ * j + (deltaJ / 2.0),
-          0
-        )
-        #partsBuf.push(
-          #deltaI * i + (deltaI / 2.0),
-          #deltaJ * j + (deltaJ / 2.0),
-          #1
-        #)
-    partsBuf = avr.createBuffer(partsBuf)
-
     c = avr.createChain()
+    vis = avr.createVisual({ constants: p.constants })
+
+    $(document).keydown (e) ->
+      switch e.which
+        when 68 then vis.beginRotate([0, 1, 0])
+        when 65 then vis.beginRotate([0, -1, 0])
+        when 83 then vis.beginRotate([0, 1, 0])
+        when 87 then vis.beginRotate([0, -1, 0])
+        when 81 then wind = true
+
+    $(document).keyup (e) ->
+      vis.endRotate()
+      wind = false
 
     # Generate buffers
     c.framebuffer('reader', size: size)
@@ -111,9 +110,10 @@ $ ->
     c.pass(p.zero, 'auto pressures')
     c.pass(p.zero, 'auto viscosity')
 
-    #$("#next").click ->
-    avr.drawLoop 20, ->
-    #indent ->
+    wallDispl = 0
+
+    avr.drawLoop 40, ->
+      wallDispl = if wind or $("#moveRight").is(':checked') then 20 else 0
 
       # Calculating new velocities
       c.pass(p.velocity, 'front velocities', {
@@ -122,11 +122,8 @@ $ ->
         pressures: 'auto pressures'
         viscosity: 'auto viscosity'
       }, ({prog}) ->
-        prog.sendFloat3 'userDefined', [
-          if $("#moveRight").is(':checked') then 0.3 else 0,
-          if $("#moveRight").is(':checked') then 0.02 else 0,
-          0
-        ]
+        vis.sendUniform prog
+        prog.sendFloat 'wallDispl', wallDispl
       )
 
       # Calculating new position
@@ -201,31 +198,18 @@ $ ->
 
       # Display
 
-      toDebug = 'auto particles'
-
       avr.clear()
-      time += 1
 
-      #avr.visualize(AVR.Axes)
+      vis.visualize(AVR.Axes)
 
-      #avr.visualize(avr.vectors({
-        #colors: [
-          #[1.0, 0.0, 0.0, 1.0]
-          #[0.0, 0.0, 1.0, 1.0]
-        #]
-        #particles: c.getBuffer('front particles')
+      vis.visualize(AVR.Particles, {
+        positions: c.getBuffer('front particles')
+      })
+
+      #vis.visualize(AVR.Vectors, {
+        #positions: c.getBuffer('front particles')
         #vectors: c.getBuffer('front velocities')
-      #}))
+      #})
 
-      #p.axes.use (prog) ->
-        #prog.sendFloat('time', time)
-        #prog.drawBuffer(axesBuf, vars: 3, type: avr.gl.LINES)
-
-      p.particles.use (prog) ->
-        prog.sendFloat('time', time)
-        prog.sendInt('positions', c.getBuffer('front particles').activeTexture(0))
-        prog.sendInt('colors', c.getBuffer(toDebug).activeTexture(1))
-        prog.sendInt('vectors', c.getBuffer('front velocities').activeTexture(2))
-        prog.drawBuffer(partsBuf, vars: 3, type: avr.gl.POINTS)
-
+      vis.next()
       c.swapBuffers()
