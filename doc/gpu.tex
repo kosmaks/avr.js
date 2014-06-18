@@ -108,6 +108,18 @@ Shading Language).
     Ключевое слово varying.
 \end{itemize}
 
+Связи между модификаторами переменных и типами шейдеров изображены на рисунке \ref{fig:glsl_vars}.
+It is very important to utilize the computational power of GPU interpo- lators whenever possible – Many values can be calculated per-vertex with proper interpolation subsequently available in the fragment shader saving some rendering time as there is usually more pixels rendered than triangles in the processed object.
+
+\begin{figure}
+\begin{center}
+  \includegraphics[scale=1]{Figures/glsl_vars}
+\end{center}
+\caption{Связи между модификаторами переменных и типами шейдеров в GLSL}
+\label{fig:glsl_vars}
+\end{figure}
+
+
 \subsection{Кадровые буферы}
 
 Кадровым буфером называется область памяти для кратковременного хранения данных перед отправкой

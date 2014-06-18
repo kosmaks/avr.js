@@ -49,7 +49,17 @@
 
 Первая задача, которую необходимо решить при реализации -- организация структуры таким образом, 
 чтобы добавление и расширение существующих компонентов было максимально простым. Задача
-усложняется, когда появляется большая зависимость между компонентами.
+усложняется, когда появляется большая зависимость между компонентами. Схема зависимостей
+между компонентами системы изображена на рисунке \ref{fig:architecture}.
+
+\begin{figure}
+\begin{center}
+  \includegraphics[scale=1]{Figures/architecture}
+\end{center}
+\caption{Схема зависимостей между компонентами}
+\label{fig:architecture}
+\end{figure}
+
 
 В состав программного обеспечения входят следующие компоненты:
 
@@ -176,6 +186,27 @@ AVR.Component. Для удобства инициализации использ
 соответствующие данные из вершинного шейдера и кадровых буферов и передаются на выход.
 Для векторов на вход программы подается начальный и конечный цвет, которые
 интерполируются в зависимости от текущего фрагмента.
+
+Результат визуализации в виде точек и векторов изображены на рисунках \ref{fig:ss_points} и
+\ref{fig:ss_vectors} соответственно.
+
+
+\begin{figure}
+\begin{center}
+  \includegraphics[scale=1]{Figures/points}
+\end{center}
+\caption{Визуализация в виде точек}
+\label{fig:ss_points}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+  \includegraphics[scale=1]{Figures/vectors}
+\end{center}
+\caption{Визуализация в виде векторов}
+\label{fig:ss_vectors}
+\end{figure}
+
 
 %\subsubsection{Шагающие кубики}
 % ???? 
@@ -382,6 +413,29 @@ W(r - r_j, h) \equiv \frac{315}{64\pi{}h^9}(h^2-||r-r_j||^2)^3
 \begin{equation}
 \label{eq:}
 \bigtriangledown^2W(r - r_j, h) \equiv \frac{45}{\pi{}h^6}(h - ||r - r_j||)
+\end{equation}
+
+Конечные уравнения, которые используются в визуализации получаются подставлением ядер
+в аппроксимацию уравнений Навье-Стокса:
+
+\begin{equation}
+\label{eq:}
+\frac{dv_i}{dt} = g - \frac{1}{\rho_i}\bigtriangledown{}p + \frac{\mu}{\rho_i}\bigtriangledown^2v
+\end{equation}
+
+\begin{equation}
+\label{eq:}
+\rho_i \approx \sum_{j}m_j\frac{315}{64\pi{}h^9} (h^2 - ||r - r_j||^2)^3
+\end{equation}
+
+\begin{equation}
+\label{eq:}
+\frac{\bigtriangledown{}p_i}{\rho_i} \approx \sum_{j}m_j(\frac{p_i}{\rho_i^2} + \frac{p_j}{\rho_j^2}) \frac{-45}{\pi{}h^6}(h - ||r-r_j||)^2\frac{r - r_j}{||r - r_j||}
+\end{equation}
+
+\begin{equation}
+\label{eq:}
+\frac{\mu}{\rho_i}\bigtriangledown^2v_i \approx \frac{\mu}{\rho_i} \sum_{j}m_j(\frac{v_j - v_i}{\rho_j})\frac{45}{\pi{}h^6}(h - ||r - r_j||)
 \end{equation}
 
 Простой подход к реализации -- полный перебор. Преимуществом данного подходя является быстрота
