@@ -1,0 +1,202 @@
+\newpage
+\section{Руководство пользователя}
+
+Чтобы использовать инструмент, необходимо подключить внешний 
+скрипт avr.js при помощи тэга SCRIPT.
+
+%\begin{verbatim}
+  %<script type='text/javascript' src='avr.js'></script>
+%\end{verbatim}
+
+Для инициализации используется конструктор класса AVR.Context. 
+Первым параметром которому передается объект типа CANVAS.
+
+%\begin{verbatim}
+  %var avr = new AVR.Context(document.getElementById('display'));
+%\end{verbatim}
+
+Для создания визуализации используется метод loadPrograms. Он
+позволяет загрузить нужные шейдеры и передать константы. Каждый
+из шейдеров автоматически проходит предварительную обработку.
+При необходимости в консоль браузера выведется ошибка компиляции.
+
+%\begin{verbatim}
+  %avr.loadPrograms({
+    %// описание и ссылки на нужные программы
+  %}, {
+    %// константы
+  %}, function(prog) {
+    %// код визуализации
+  %});
+%\end{verbatim}
+
+По-умолчанию для каждой шейдерной программы необходимо указать
+vertexUrl и fragmentUrl для вершинного и фрагментного шейдеров соответственно.
+Если фрагментный шейдер предполагается использовать для просчета частиц,
+ссылку на вершинный шейдер можно опустить.
+
+%\begin{verbatim}
+  %avr.loadPrograms({
+    %// ...
+    %genGridCells : "shaders/gen_grid_cells.glsl",
+    %genAccessor  : "shaders/gen_accessor.glsl",
+    %bitonicSort  : "shaders/bitonic.glsl",
+    %// ..
+   
+    %axes: {
+      %vertexUrl: "shaders/axes.vertex.glsl",
+      %fragmentUrl: "shaders/axes.fragment.glsl",
+    %}
+  %}, { ...
+%\end{verbatim}
+
+После загрузки, программы будут доступны в функции обратного вызова.
+
+Чтобы создать конвейер для обработки частиц можно либо вручную писать
+использование программ с помощью метода use, либо использовать встроенный
+компонент AVR.Chain. Создать цепь можно с помощью метода createChain.
+
+Для того чтобы исполнить программу и вывести содержимое на экран нужно
+вызывать метод pass, первым параметром к которому будет программа типа
+AVR.Program.
+
+%\begin{verbatim}
+  %var c = avr.createChain();
+  %c.pass(prog.helloWorld);
+%\end{verbatim}
+
+В данном случае начальными данными для вершинного шейдера будут 4
+вершины, расположенные в углах экрана (от -1 до 1). Размер кадрового
+буфера определяется размером элемента.
+
+Для создания фрагментного буфера в цепи необходимо использовать метод
+framebuffer. Первый параметр -- название буфер, второй -- информация о 
+фрагментном буфере: размер (size), формат (format), тип (type), начальные
+данные (data). Для создания двойного буфера используется метод doubleFramebuffer.
+Параметры те же.
+
+%\begin{verbatim}
+  %c.framebuffer('reader', { size: size });
+  %c.doubleFramebuffer('grid', { size: size });
+  %c.doubleFramebuffer('particles', { size: size });
+%\end{verbatim}
+
+Чтобы указать в какой кадровый буфер записать результат программы, нужно 
+указать селектор вторым параметром в методе pass.
+
+%\begin{verbatim}
+  %c.pass(p.fill, 'back particles');
+  %c.pass(p.zero, 'back velocities');
+  %c.pass(p.zero, 'auto densities');
+  %c.pass(p.zero, 'auto pressures');
+%\end{verbatim}
+
+Для того, чтобы передать содержимое других буферов в программу третьим
+параметром в pass указывается объект где ключами являются названия uniform
+переменных, а значениями селектор кадрового буфера.
+
+%\begin{verbatim}
+  %c.pass(p.position, 'front particles', {
+    %back: 'back particles',
+    %velocities: 'front velocities'
+  %});
+%\end{verbatim}
+
+Для более детальной настройки данного этапа вычислений можно использовать
+функцию обратного вызова в методе pass. Первый параметр которой -- объект
+содержащий кадровый буфер и программу типов AVR.Framebuffer и AVR.Program.
+
+%\begin{verbatim}
+  %c.pass(p.velocity, 'front velocities', {
+    %back: 'back velocities',
+    %particles: 'back particles',
+    %pressures: 'auto pressures',
+    %viscosity: 'auto viscosity'
+  %}, function(prog) {
+    %prog.sendFloat('wallDispl', wallDispl)
+  %});
+%\end{verbatim}
+
+Для сортировки данных в кадровом буфере используется алгоритмом
+битонической сортировки, необходимо использовать метод bitonicSort,
+первым параметром которого является название двойного кадрового буфера.
+Сортировка происходит по четвертой координате $w$.
+
+%\begin{verbatim}
+  %c.bitonicSort('grid');
+%\end{verbatim}
+
+Для того чтобы визуализировать результат вычислений, необходимо создать
+экземпляр класса AVR.Visual при помощи метода createVisual. Затем
+при помощи метода visualize создавать визуальное представление.
+Первым параметром в visualize является тип визуализации. Вторым параметром
+передается объект для конфигурации визуального представления.
+
+Реализованы следующие типы визуального представления:
+
+\begin{itemize}
+  \item AVR.Axes -- рисует оси координат;
+  \item AVR.Points -- изобразить в виде точек. По ключу particles
+    указывается кадровый буфер из которого будут браться координаты частиц.
+    По ключу colors указывается буфер для получения цветов каждой из частиц;
+  \item AVR.Vectors -- изобразить в виде векторов. Ключ particles
+    указывает кадровый буфер для координат частиц. Ключ colors
+    принимает массив из двух элементов с цветами начала и конца вектора. Ключ
+    vectors указывает на буфер векторов. Ключ scale содержит число масштаба
+    векторов.
+\end{itemize}
+
+Для очистки экрана используется метод clear. Перед генерацией следующего
+кадра вызывается метод swapBuffers, который меняет местами двойные буферы.
+
+%\begin{verbatim}
+  %avr.clear();
+
+  %vis.visualize(AVR.Axes);
+
+  %vis.visualize(AVR.Particles, {
+    %positions: c.getBuffer('front particles')
+  %});
+
+  %vis.visualize(AVR.Vectors, {
+    %positions: c.getBuffer('front particles'),
+    %vectors: c.getBuffer('front velocities'),
+    %scale: 7
+  %});
+
+  %c.swapBuffers();
+%\end{verbatim}
+
+Для того чтобы использовать константы в шейдерах используются синтаксис
+\$названиеКонстанты.
+
+%\begin{verbatim}
+  %vec2 cursor = floor(vec2($sizex, $sizey) / 2.);
+%\end{verbatim}
+
+Чтобы исключить дублирование кода в шейдерах, реализовано включение
+кода одного из шейдеров в код текущего при помощи директивы. При этом
+шейдеры загружаются один раз и включаются в месте написания директивы.
+
+%\begin{verbatim}
+  %attribute vec3 vertex;
+  %uniform sampler2D positions;
+
+  %$include "shaders/transform.glsl"
+ 
+  %void main() {
+    %// ...
+%\end{verbatim}
+
+Для создания перспективы и работы с пользовательским вводом
+реализованы основные функции в шейдере ``shader/transform.glsl''.
+
+%\begin{verbatim}
+  %vec4 perspective(vec3 src); // создает перспективу для точки
+  %bool mouseTouch(vec3 part); // возвращает true, если данная 
+                                 %частица попала в радиус нажатия
+
+  %vec3 rotation; // содержит текущие углы вращения
+  %vec2 mouse; // содержит текущую координату мыши в мировых
+                 %координатах (от -1 до 1)
+%\end{verbatim}

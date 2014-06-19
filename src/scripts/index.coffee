@@ -202,9 +202,9 @@ $ ->
 
       vis.visualize(AVR.Axes)
 
-      #vis.visualize(AVR.Particles, {
-        #positions: c.getBuffer('front particles')
-      #})
+      vis.visualize(AVR.Particles, {
+        positions: c.getBuffer('front particles')
+      })
 
       vis.visualize(AVR.Vectors, {
         positions: c.getBuffer('front particles')

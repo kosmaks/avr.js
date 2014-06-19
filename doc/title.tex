@@ -10,20 +10,6 @@
   \end{minipage}
 }
 
-% styles
-
-\renewcommand{\ESKDtitleFontI}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontII}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontIII}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontIV}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontV}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontVI}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontVII}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontVIII}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontIX}{\ESKDfontIV}
-\renewcommand{\ESKDtitleFontX}{\ESKDfontIV}
-\renewcommand{\baselinestretch}{1}
-
 % data
 
 \ESKDdepartment{ Министерство образования и науки Российской Федерации }
@@ -36,14 +22,22 @@
   Кафедра <<Электронные вычислительные машины>>
 }
 
+\renewcommand{\ESKDtheTitleFieldI}{
+  \textmd{
+    \ESKDtheDepartment{} \\
+    \ESKDtheCompany{}
+  }
+}
+  
+
 \ESKDauthor{М.А. Костюченко}
 \ESKDchecker{}
 \ESKDnormContr{}
 \ESKDapprovedBy{К.А. Домбровский}
 \newcommand{\ksSciDirector}{И.Л. Кафтанников}
 \ESKDdate{2014/06/05}
-\ESKDsignature{ЮУРГУ--ШИФР}
-\ESKDletter{}{}{} % Литеры
+\ESKDsignature{010400.2014.887.00 ПЗ}
+\ESKDletter{Д}{}{} % Литеры
 \ESKDtitleDesignedBy{Автор работы, \\ студент группы ПС-427}{\ESKDtheAuthor} % Подпись и дата под заголовком документа
 
 \ESKDdocName{Алгоритмизация визуальных представлений}
@@ -51,6 +45,10 @@
   ПОЯСНИТЕЛЬНАЯ ЗАПИСКА \\
   К ВЫПУСКНОЙ КВАЛИФИКАЦИОННОЙ РАБОТЕ \\
   \ESKDtheSignature
+}
+
+\renewcommand{\ESKDtheTitleFieldIV}{
+  \textmd{ \ESKDtheDocName }
 }
  
 \renewcommand{\ESKDtheTitleFieldII}{ 
@@ -70,7 +68,47 @@
   \ksPersonField{Автор работы}{студент группы ПС-427}{\ESKDtheAuthor} \\
   \vspace{2cm}
   \hfill
-  \ksPersonField{Нормоконтролер}{}{}
+  \ksPersonField{Нормоконтролер}{старший преподаватель каф. <<Электронные вычислительные машины>>}{С.В. Сяськов}
 }
  
 \renewcommand{\ESKDtheTitleFieldX}{Челябинск \ESKDtheYear}
+
+% styles
+
+\renewcommand{\ESKDtitleFontI}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontII}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontIII}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontIV}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontV}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontVI}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontVII}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontVIII}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontIX}{\ESKDfontIV}
+\renewcommand{\ESKDtitleFontX}{\ESKDfontIV}
+
+\newcommand{\stamp}[1]{\setmainfont{Arial} \textit{#1}}
+
+\renewcommand{\ESKDcolumnXfIname}{\scriptsize\stamp{Разраб.}}
+\renewcommand{\ESKDcolumnXfIIname}{\scriptsize\stamp{Провер.}}
+\renewcommand{\ESKDcolumnXfIVname}{\scriptsize\stamp{Реценз.}}
+\renewcommand{\ESKDcolumnXfVname}{\scriptsize\stamp{Н.Контр.}}
+\renewcommand{\ESKDcolumnXfVIname}{\scriptsize\stamp{Утвердил}}
+\renewcommand{\ESKDcolumnXIVname}{\scriptsize\stamp{Изм.}}
+\renewcommand{\ESKDcolumnXVname}{\scriptsize\stamp{Лист}}
+\renewcommand{\ESKDcolumnXVIname}{\scriptsize\stamp{№ докум.}}
+\renewcommand{\ESKDcolumnXVIIname}{\scriptsize\stamp{Подпись}}
+\renewcommand{\ESKDcolumnXVIIIname}{\scriptsize\stamp{Дата}}
+\renewcommand{\ESKDcolumnIVname}{\scriptsize\stamp{Лит.}}
+\renewcommand{\ESKDcolumnVIIname}{\scriptsize\stamp{Лист}}
+\renewcommand{\ESKDcolumnVIIIname}{\scriptsize\stamp{Листов}}
+
+\ESKDcolumnXIfI{\scriptsize\stamp{Костюченко М.А.}}
+\ESKDcolumnXIfV{\scriptsize\stamp{Сясков С.В.}}
+\ESKDcolumnXIfVI{\scriptsize\stamp{Домбровский К.А.}}
+\ESKDcolumnIVfI{\scriptsize\stamp{Д}}
+
+\ESKDcolumnI{\stamp{\ESKDtheDocName}}
+\ESKDcolumnII{\stamp{\ESKDtheSignature}}
+%\ESKDcolumnVII{\stamp{\thepage}}
+%\ESKDcolumnVIII{\stamp{\ESKDtotal{page}}}
+\ESKDcolumnIX{\stamp{ЮУрГУ \\ \normalsize Кафедра ЭВМ}}

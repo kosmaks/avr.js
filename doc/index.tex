@@ -1,41 +1,97 @@
-\documentclass[a4paper,14pt,russian,nocolumnsxix,nocolumnxxxii,nocolumnxxxi,hpadding=10mm]{eskdtext}
+\documentclass[a4paper,utf8,14pt,russian,nocolumnsxix,nocolumnxxxii,nocolumnxxxi,hpadding=10mm]{eskdtext}
+%\documentclass[russian,utf8,pointsection,nocolumnsxix,nocolumnxxxi,nocolumnxxxii,a4paper]{eskdtext}
 
 \usepackage{cmap}
-\usepackage[T2A]{fontenc}
-\usepackage[utf8x]{inputenc}
-\usepackage[russian]{babel}
+%\usepackage[T2A]{fontenc}
+%\usepackage[LY1]{fontenc}
+%\usepackage[utf8x]{inputenc}
+%\usepackage[russian]{babel}
+\usepackage{eskdtotal}
 \usepackage{lastpage}
 \usepackage{graphicx}
 \usepackage{longtable}
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{glossaries}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{gensymb}
+\usepackage{xecyr}
+\usepackage{xltxtra}
+%\usepackage[russian]{babel}
+\usepackage{polyglossia}
+\usepackage{titlesec}
+\usepackage[titles]{tocloft}
+ 
+% Настройка вертикальных и горизонтальных отступов
+\titlespacing*{\section}{\parindent}{*4}{*4}
+\titlespacing*{\subsection}{\parindent}{*4}{*4}
+\titlespacing*{\subsubsection}{\parindent}{*4}{*4}
 
-\renewcommand{\theenumi}{\arabic{enumi}} % Меняем везде перечисления на цифра.цифра
-\renewcommand{\labelenumi}{\arabic{enumi}} % Меняем везде перечисления на цифра.цифра
-\renewcommand{\theenumii}{.\arabic{enumii}} % Меняем везде перечисления на цифра.цифра
-\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}.} % Меняем везде перечисления на цифра.цифра
-\renewcommand{\theenumiii}{.\arabic{enumiii}} % Меняем везде перечисления на цифра.цифра
-\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.} % Меняем везде перечисления на цифра.цифра
+\defaultfontfeatures{Mapping=tex-text}
+\setdefaultlanguage{russian}
+%\setotherlanguage{russian}
+\newfontfamily\russianfont{Times New Roman}
 
-\newcommand{\nocontentsline}[3]{}
-\newcommand{\tocless}[2]{\bgroup\let\addcontentsline=\nocontentsline#1{#2}\egroup}
+\setmainfont[Mapping=tex-text]{Times New Roman}
+\setsansfont[Mapping=tex-text]{Arial}
+\setmonofont[Scale=MatchLowercase]{Courier New}
 
-% Font settings
-\linespread{1.3} % 1.5
-%\renewcommand{\rmdefault}{ftm} % Times new roman
-\frenchspacing
+\addto{\captionsrussian}{\renewcommand{\figurename}{Рисунок}}
+\def\russian@capsformat{
+  \def\postchapter{\@aftersepkern}
+  \def\postsection{\@aftersepkern}
+  \def\postsubsection{\@aftersepkern}
+  \def\postsubsubsection{\@aftersepkern}
+  \def\postparagraph{\@aftersepkern}
+  \def\postsubparagraph{\@aftersepkern}
+}
+\sloppy
+ 
+\titleformat{\section}
+    {\sffamily\normalsize\centering\MakeUppercase}
+    {\thesection}
+    {1em}{}
+ 
+\titleformat{\subsection}
+    {\sffamily\normalsize}
+    {\thesubsection}
+    {1em}{}
+ 
+\titleformat{\subsubsection}
+    {\sffamily\normalsize}
+    {\thesubsubsection}
+    {1em}{}
 
-%\ESKDsectStyle{section}{\normalsize} % Заголовки глав обычным шрифтом
-\ESKDsectStyle{subsection}{\normalsize} % Заголовки разделов обычным шрифтом
-\ESKDsectStyle{subsubsection}{\normalsize} % Заголовки подразделов обычным шрифтом
+\XeTeXinterchartokenstate=1
+\XeTeXcharclass `\- 24
+\XeTeXinterchartoks 24 0 ={\hskip\z}
+\XeTeXinterchartoks 0 24 ={\nobreak}
+
+\newcounter{No}
+\renewenvironment{enumerate}[1][\arabic{No}]{\begin{list}{#1}{\topsep=0pt\parsep=0pt plus 0pt\itemsep=\parsep\leftmargin=0pt\itemindent=0cm\usecounter{No}}\addtolength{\itemindent}{\labelwidth}}{\end{list}}
+\renewenvironment{itemize}[1][{--}]{\begin{list}{#1}{\topsep=0pt\parsep=0pt plus 0cm\itemsep=\parsep\leftmargin=0pt \itemindent=0cm}\addtolength{\itemindent}{\labelwidth}}{\end{list}}
+
+\newcommand{\numless}[1]{
+\setcounter{secnumdepth}{0}
+\setcounter{secnumdepth}{3}
+}
+
+\renewcommand{\cftsecfont}{\mdseries}
+\renewcommand{\cftsecpagefont}{\mdseries}
 
 \input{title}
 
 \begin{document}
+  \linespread{1.0} % 1.5
+  \selectfont
   \maketitle
+  \maketitle
+  \linespread{1.35} % 1.5
+  \selectfont
   \input{annotation}
   \newpage
+  \renewcommand{\contentsname}{Оглавление}
   \tableofcontents 
   \input{intro} % 1 -> 2
   \input{glossarium}
@@ -44,11 +100,15 @@
   \input{gpu} % 4 -> 5?? (pictures)
   \input{realization} % 7
   \input{performance}
+  \input{documentation}
   \input{usage}
   \input{outro} 
   \newpage
 
-  \begin{thebibliography}{widest entry}
+  %\catcode`"\active\def"{\relax}
+  \renewcommand\refname{Библиографический список}
+  \bibliographystyle{gost780s}
+  \begin{thebibliography}{}
     \bibitem{webcl10} Khronos Releases WebCL 1.0 Specification -- \url{https://www.khronos.org/news/press/khronos-releases-webcl-1.0-specification}.
     \bibitem{raytracing02} Timothy, J.P. Ray tracing on programmable graphics hardware / T.J. Purcell, I. Buck, W.R. Mark, P. Hanrahan // ACM Transactions on Graphics (TOG). -- 2002. -- V. 21, №3. -- P. 703-712.
     \bibitem{gpu} Fatahalian, K. A closer look at GPUs / K. Fatahalian, M. Houston // Communications of the ACM. -- 2008. -- V. 51, №10. -- P. 50-57.
