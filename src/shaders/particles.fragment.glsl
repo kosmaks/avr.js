@@ -20,11 +20,11 @@ void main() {
 
   gl_FragColor = texture2D(colors, index.xy) / $factor;
 
-  float inten = (gl_FragColor.x + gl_FragColor.y + gl_FragColor.y)
-              / 3.;
+  /*float inten = (gl_FragColor.x + gl_FragColor.y + gl_FragColor.y)*/
+              /*/ 3.;*/
 
-  gl_FragColor = vec4(inten, inten, inten, 1.);
-  /*gl_FragColor.w = 1.;*/
+  /*gl_FragColor = vec4(inten, inten, inten, 1.);*/
+  gl_FragColor.w = 1.;
   /*vec3 result = vec3(index.x, 0.5, index.y);*/
   /*gl_FragColor = vec4(result, 0.7);*/
 

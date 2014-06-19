@@ -206,11 +206,11 @@ $ ->
         positions: c.getBuffer('front particles')
       })
 
-      vis.visualize(AVR.Vectors, {
-        positions: c.getBuffer('front particles')
-        vectors: c.getBuffer('front velocities')
-        scale: 7
-      })
+      #vis.visualize(AVR.Vectors, {
+        #positions: c.getBuffer('front particles')
+        #vectors: c.getBuffer('front velocities')
+        #scale: 7
+      #})
 
       vis.next()
       c.swapBuffers()
