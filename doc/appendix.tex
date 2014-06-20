@@ -1,0 +1,243 @@
+\section*{ПРИЛОЖЕНИЯ}
+\begin{center}
+  Приложение А \\
+  Результаты тестирования
+\end{center}
+%\numless{\subsection{Приложение А Результаты тестирования}}
+
+\addcontentsline{toc}{section}{ПРИЛОЖЕНИЯ\hfill}
+\addcontentsline{toc}{subsection}{ПРИЛОЖЕНИЕ А Результаты тестирования}
+
+\renewcommand{\thetable}{A.\arabic{table}}
+\setcounter{table}{0} 
+%\ESKDappendix{}
+
+\begin{table}[h!]
+  \captionsetup{width=0.9\textwidth}
+  \caption{\label{tab:fst:simple}Комп. №1. Зависимость от типа визуализации}
+  \begin{center}
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      Тип визуализации & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      Облако точек & 320 & 175 & 97 & 40 & 24 \\
+      Направленные векторы & 320 & 170 & 95 & 39 & 23 \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \captionsetup{width=0.7\textwidth}
+  \caption{\label{tab:fst:radius}Комп. №1. Зависимость от радиуса взаимодействия}
+  \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+      \hline
+      Радиус & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      5 & 320 & 175 & 97 & 40 & 24 \\
+      10 & 250 & 120 & 84 & 37 & 22 \\
+      50 & 100 & 90 & 43 & 20 & 8 \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \captionsetup{width=0.9\textwidth}
+  \caption{\label{tab:fst:algorithm}Комп. №1. Зависимость от алгоритма поиска ближайших частиц}
+  \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+      \hline
+      Алгоритм & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      Использование сетки & 320 & 175 & 97 & 40 & 24 \\
+      Полный перебор & 343 & 170 & 70 & 20 & 2 \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\newpage
+\begin{flushright}
+  Продолжение приложения А
+\end{flushright}
+
+\begin{table}[h!] 
+  \captionsetup{width=0.85\textwidth}
+  \caption{\label{tab:fst:cpu}Комп. №1. Зависимость от типа процессора} 
+  \begin{center} 
+    \begin{tabular}{|l|c|c|c|c|c|} 
+      \hline
+      Тип процессора & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      Графический & 320 & 175 & 97 & 40 & 24 \\
+      Центральный & 140 & 100 & 30 & 7 & $\approx{}0,3$ \\
+      \hline
+    \end{tabular} 
+  \end{center} 
+\end{table} 
+
+\begin{table}[h!] 
+  \captionsetup{width=0.9\textwidth}
+  \caption{\label{tab:snd:simple}Комп. №2. Зависимость от типа визуализации} 
+  \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+      \hline
+      Тип визуализации & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      Облако точек & 398 & 315 & 150 & 64 & 47 \\
+      Направленные векторы & 399 & 310 & 152 & 63 & 46 \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \captionsetup{width=0.7\textwidth}
+  \caption{\label{tab:snd:radius}Комп. №2. Зависимость от радиуса взаимодействия}
+  \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+      \hline
+      Радиус & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      5 & 398 & 315 & 150 & 64 & 47 \\
+      10 & 330 & 205 & 130 & 37 & 22 \\
+      50 & 340 & 110 & 78 & 20 & 11 \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\newpage
+\begin{flushright}
+  Продолжение приложения А
+\end{flushright}
+
+
+\begin{table}[h!]
+  \captionsetup{width=0.9\textwidth}
+  \caption{\label{tab:snd:algorithm}Комп. №2. Зависимость от алгоритма поиска ближайших частиц}
+  \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+      \hline
+      Алгоритм & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      Использование сетки & 398 & 315 & 150 & 64 & 47 \\
+      Полный перебор & 324 & 203 & 121 & 70 & 8 \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \captionsetup{width=0.8\textwidth}
+  \caption{\label{tab:snd:cpu}Комп. №2. Зависимость от типы процессора}
+  \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+      \hline
+      Тип процессора & 100 ч. & 1000 ч. & 5000 ч. & 10000 ч. & 100000 ч. \\
+      \hline
+      Графический & 398 & 315 & 150 & 64 & 47 \\
+      Центральный & 153 & 102 & 31 & 7 & $\approx{}0,4$ \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \captionsetup{width=0.6\textwidth}
+  \caption{\label{tab:brows:ie}Сравнение версий Internet Explorer}
+  \begin{center}
+    \begin{tabular}{|c|c|l|}
+      \hline
+      Версия & Дата релиза & Статус \\
+      \hline
+      11.0 & Октябрь 2013 & Работает как ожидалось \\
+      < 10.0 & Октябрь 2012 & Не поддерживается \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\newpage
+\begin{flushright}
+  Продолжение приложения А
+\end{flushright}
+
+
+%\newpage
+%\begin{flushright}
+  %Продолжение приложения А
+%\end{flushright}
+
+\begin{table}[h!]
+  \captionsetup{width=0.68\textwidth}
+  \caption{\label{tab:brows:ff}Сравнение версий Firefox}
+  \begin{center}
+    \begin{tabular}{|c|c|l|}
+      \hline
+      Версия & Дата релиза & Статус \\
+      \hline
+      30.0 & Июнь 2014 & Работает как ожидалось \\
+      15.0 & Август 2012 & Работает как ожидалось \\
+      10.0 & Январь 2012 & Незначительное падение FPS \\
+      < 3.6 & Январь 2010 & Не поддерживается \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \captionsetup{width=0.6\textwidth}
+  \caption{\label{tab:brows:chrome}Сравнение версий Chrome}
+  \begin{center}
+    \begin{tabular}{|c|c|l|}
+      \hline
+      Версия & Дата релиза & Статус \\
+      \hline
+      35.0 & Май 2014 & Работает как ожидалось \\
+      18.0 & Март 2012 & Работает как ожидалось \\
+      10.0 & Март 2011 & Работает как ожидалось \\
+      < 7.0 & Октябрь 2010 & Не поддерживается \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\newpage
+\begin{flushright}
+  Продолжение приложения А
+\end{flushright}
+
+\begin{table}[h!]
+  \captionsetup{width=0.6\textwidth}
+  \caption{\label{tab:brows:safari}Сравнение версий Safari}
+  \begin{center}
+    \begin{tabular}{|c|c|l|}
+      \hline
+      Версия & Дата релиза & Статус \\
+      \hline
+      7.0 & Май 2014 & Работает как ожидалось \\
+      5.1 & Сентябрь 2013 & Работает как ожидалось \\
+      < 5.0 & Июль 2011 & Не поддерживается \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \captionsetup{width=0.6\textwidth}
+  \caption{\label{tab:brows:opera}Сравнение версий Opera}
+  \begin{center}
+    \begin{tabular}{|c|c|l|}
+      \hline
+      Версия & Дата релиза & Статус \\
+      \hline
+      22.0 & Июнь 2014 & Работает как ожидалось \\
+      15.0 & Июль 2013 & Работает как ожидалось \\
+      < 11.6 & Декабрь 2011 & Не поддерживается \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}

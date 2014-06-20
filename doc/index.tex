@@ -22,6 +22,8 @@
 \usepackage{polyglossia}
 \usepackage{titlesec}
 \usepackage[titles]{tocloft}
+
+\usepackage{caption}
  
 % Настройка вертикальных и горизонтальных отступов
 \titlespacing*{\section}{\parindent}{*4}{*4}
@@ -74,6 +76,7 @@
 
 \newcommand{\numless}[1]{
 \setcounter{secnumdepth}{0}
+#1
 \setcounter{secnumdepth}{3}
 }
 
@@ -122,4 +125,6 @@
     \bibitem{sphMon92} Monaghan, J.J. Smoothed Particle Hydrodynamics / J.J. Monaghan // Annual Review of Astronomy and Astrophysics. -- 1992. -- V. 30. -- P. 543–574.
     \bibitem{neisearch} Bayraktar, S. GPU-Based Neighbor-Search Algorithm for Particle Simulations / S. Bayraktar, U. Gudukbay, B. Ozguç // J. Graphics Tools. -- 2009. -- V. 14. -- P. 31-42.
   \end{thebibliography}
+
+  \input{appendix}
 \end{document}
