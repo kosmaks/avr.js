@@ -24,57 +24,6 @@
       </div>
     </div>
 
-    <div class='container' id='examples'>
-      <h1>Examples</h1>
-      <div class='row'>
-        <div class='col-md-4'>
-          <h2>Initialization</h2>
-          <p>AVR requires WebGL and asks for context at the moment of initilization.</p>
-        </div>
-        <div class='col-md-8'>
-          <pre>
-            avr = new AVR.Context(document.getElementById('display'))
-            avr.loadPrograms({
-              // here comes your shaders
-            }, {
-              // shader constants here
-            }, function(p) {
-              // magic stuff goes here ...
-            });
-          </pre>
-        </div>
-
-        <div class='col-md-4'>
-          <h2>Simple chain</h2>
-          <p>Chains are computing flow. Each consists of one or more passes.</p>
-          <p>Example result:</p>
-          <p><img alt='Screenshot' class='screen' src='res/screen0.png'/></p>
-        </div>
-        <div class='col-md-8'>
-          <pre>
-            // index.js
-
-            avr.loadPrograms({
-              hello: "shaders/hello.glsl"
-            }, {}, function(p) {
-              
-              var c = avr.createChain();
-              avr.clear();
-              c.pass(p.hello);
-
-            });
-
-            // shaders/hello.glsl
-
-            precision mediump float;
-            varying vec2 index;
-
-            void main() { gl_FragColor = vec4(index, 0., 1.); }
-          </pre>
-        </div>
-      </div>
-    </div>
-
     <div class='container'>
       <hr/>
       <footer>
